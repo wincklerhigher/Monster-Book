@@ -222,7 +222,7 @@ const getMonsterImage = (slug, name, existingUrl) => {
     'zombie': 'https://5e.tools/img/monsters/Zombie.jpg',
   };
   
-  return knownImages[slug] || monster.img_url || '';
+  return knownImages[slug] || existingUrl || '';
 };
 
 const parseArmorClass = (ac) => {
