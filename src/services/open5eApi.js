@@ -133,16 +133,32 @@ export const fetchMonsterBySlug = async (slug) => {
     searchTerm = searchTerm.replace(new RegExp(`^${prefix}\\s+`, 'i'), '');
   }
   
-  const response = await fetch(`${BASE_URL}/monsters/?search=${encodeURIComponent(searchTerm)}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch monster: ${response.status}`);
+  searchTerm = searchTerm.trim();
+  if (!searchTerm) {
+    throw new Error('Monster not found');
   }
-  const data = await response.json();
   
+  const trySearch = async (term) => {
+    const response = await fetch(`${BASE_URL}/monsters/?search=${encodeURIComponent(term)}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch monster: ${response.status}`);
+    }
+    return response.json();
+  };
+  
+  let data = await trySearch(searchTerm);
   let monster = data.results?.find(m => m.slug === slug);
   
   if (!monster && data.results?.length > 0) {
     monster = data.results[0];
+  }
+  
+  if (!monster) {
+    const altData = await trySearch(cleanSlug);
+    monster = altData.results?.find(m => m.slug === slug);
+    if (!monster && altData.results?.length > 0) {
+      monster = altData.results[0];
+    }
   }
   
   if (!monster) {
