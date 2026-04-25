@@ -224,7 +224,6 @@ const getMonsterImage = (slug, name, existingUrl) => {
   
   return knownImages[slug] || monster.img_url || '';
 };
-};
 
 const parseArmorClass = (ac) => {
   if (!ac) return 10;
