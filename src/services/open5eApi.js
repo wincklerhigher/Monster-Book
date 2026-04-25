@@ -112,9 +112,14 @@ export const fetchMonsterTypes = async () => {
 };
 
 export const fetchMonsterBySlug = async (slug) => {
-  const response = await fetch(`${BASE_URL}/monsters/${slug}/`);
+  const response = await fetch(`${BASE_URL}/monsters/?search=${encodeURIComponent(slug.replace(/-/g, ' '))}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch monster: ${response.status}`);
   }
-  return response.json();
+  const data = await response.json();
+  const monster = data.results?.find(m => m.slug === slug);
+  if (!monster) {
+    throw new Error('Monster not found');
+  }
+  return monster;
 };
