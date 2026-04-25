@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchMonsterBySlug, normalizeMonster } from '../services/open5eApi';
+import LanguageSwitch from '../components/LanguageSwitch';
 import StatBlock from '../components/StatBlock';
 import '../styles/MonsterPage.css';
 
@@ -40,9 +41,12 @@ const MonsterPage = () => {
 
   return (
     <div className="monster-page">
-      <button className="back-button" onClick={() => window.history.back()}>
-        ← {t('back')}
-      </button>
+      <div className="page-header">
+        <button className="back-button" onClick={() => window.history.back()}>
+          ← {t('back')}
+        </button>
+        <LanguageSwitch />
+      </div>
       <div className="monster-detail">
         <h1 className="monster-name">{monster.namePt || monster.name}</h1>
         <div className="monster-stats">
