@@ -38,7 +38,7 @@ const MonsterPage = () => {
         ← Voltar para lista
       </button>
       <div className="monster-detail">
-        <h1 className="monster-name">{monster.name}</h1>
+        <h1 className="monster-name">{monster.namePt || monster.name}</h1>
         <div className="monster-stats">
           <span className="badge cr">CR {monster.challenge_rating}</span>
           <span className="badge type">{monster.type}</span>

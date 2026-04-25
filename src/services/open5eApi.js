@@ -29,6 +29,8 @@ export const fetchMonsters = async ({ page = 1, cr = '', type = '', search = '' 
   };
 };
 
+import { translateMonsterName } from './translations';
+
 /**
  * Normalize Open5e monster to our app format.
  * @param {Object} monster - Raw monster from Open5e
@@ -38,6 +40,7 @@ export const normalizeMonster = (monster) => {
   return {
     id: monster.slug,
     name: monster.name || 'Unknown',
+    namePt: translateMonsterName(monster.name) || monster.name || 'Unknown',
     challenge_rating: monster.challenge_rating || 'Unknown',
     size: monster.size || 'Medium',
     type: monster.type || 'unknown',

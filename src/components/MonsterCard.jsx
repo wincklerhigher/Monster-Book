@@ -44,26 +44,27 @@ const getMonsterColor = (type) => {
 
 const MonsterCard = ({ monster }) => {
   const [imageError, setImageError] = useState(false);
+  const displayName = monster.namePt || monster.name;
 
   return (
     <Link to={`/monster/${monster.id}`} className="monster-card-link">
       <div className="monster-card">
         <div className={`card-image bg-gradient-to-br ${getMonsterColor(monster.type)}`}>
           {monster.image && !imageError ? (
-            <img 
-              src={monster.image} 
+            <img
+              src={monster.image}
               alt={monster.name}
               onError={() => setImageError(true)}
             />
           ) : (
             <div className="placeholder">
               <span className="placeholder-icon">{getMonsterIcon(monster.type)}</span>
-              <span className="placeholder-name">{monster.name.charAt(0)}</span>
+              <span className="placeholder-name">{displayName.charAt(0)}</span>
             </div>
           )}
         </div>
         <div className="card-content">
-          <h3 className="card-title">{monster.name}</h3>
+          <h3 className="card-title">{displayName}</h3>
           <div className="card-stats">
             <span className="badge cr">CR {monster.challenge_rating}</span>
             <span className="badge type">{monster.type}</span>
