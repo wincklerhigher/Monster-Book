@@ -8,6 +8,16 @@
   position: relative;
 }
 
+.monster-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.monster-card-link:hover {
+  text-decoration: none;
+}
+
 .monster-card::before {
   content: '';
   position: absolute;

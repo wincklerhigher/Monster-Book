@@ -110,3 +110,11 @@ export const fetchMonsterTypes = async () => {
     return [];
   }
 };
+
+export const fetchMonsterBySlug = async (slug) => {
+  const response = await fetch(`${BASE_URL}/monsters/${slug}/`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch monster: ${response.status}`);
+  }
+  return response.json();
+};

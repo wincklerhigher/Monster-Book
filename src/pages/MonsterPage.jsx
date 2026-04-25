@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { fetchMonsterDetails } from '../services/dndApi';
-import { normalizeMonster } from '../services/normalizeMonster';
+import { useParams, Link } from 'react-router-dom';
+import { fetchMonsterBySlug, normalizeMonster } from '../services/open5eApi';
 import StatBlock from '../components/StatBlock';
 import '../styles/MonsterPage.css';
 
@@ -15,11 +14,11 @@ const MonsterPage = () => {
     const loadMonster = async () => {
       try {
         setLoading(true);
-        const data = await fetchMonsterDetails(id);
+        const data = await fetchMonsterBySlug(id);
         const normalized = normalizeMonster(data);
         setMonster(normalized);
       } catch (err) {
-        setError('Failed to load monster details');
+        setError('Falha ao carregar detalhes do monstro');
         console.error(err);
       } finally {
         setLoading(false);
@@ -29,14 +28,14 @@ const MonsterPage = () => {
     loadMonster();
   }, [id]);
 
-  if (loading) return <div className="loading">Loading monster details...</div>;
+  if (loading) return <div className="loading">Carregando detalhes do monstro...</div>;
   if (error) return <div className="error">{error}</div>;
-  if (!monster) return <div className="not-found">Monster not found</div>;
+  if (!monster) return <div className="not-found">Monstro não encontrado</div>;
 
   return (
     <div className="monster-page">
       <button className="back-button" onClick={() => window.history.back()}>
-        ← Back to list
+        ← Voltar para lista
       </button>
       <div className="monster-detail">
         <h1 className="monster-name">{monster.name}</h1>
@@ -56,7 +55,7 @@ const MonsterPage = () => {
         <StatBlock stats={monster} />
         {monster.actions && monster.actions.length > 0 && (
           <div className="section">
-            <h2>Actions</h2>
+            <h2>Ações</h2>
             <ul className="actions-list">
               {monster.actions.map((action, index) => (
                 <li key={index} className="action-item">
@@ -68,7 +67,7 @@ const MonsterPage = () => {
         )}
         {monster.special_abilities && monster.special_abilities.length > 0 && (
           <div className="section">
-            <h2>Special Abilities</h2>
+            <h2>Habilidades Especiais</h2>
             <ul className="abilities-list">
               {monster.special_abilities.map((ability, index) => (
                 <li key={index} className="ability-item">
