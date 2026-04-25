@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import './SearchBar.css';
 
 const SearchBar = ({ onSearch }) => {
   const [query, setQuery] = useState('');
+  const { t } = useLanguage();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -14,13 +16,13 @@ const SearchBar = ({ onSearch }) => {
       <form onSubmit={handleSubmit} className="search-form">
         <input
           type="text"
-          placeholder="Buscar monstro por nome..."
+          placeholder={t('searchPlaceholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="search-input"
         />
         <button type="submit" className="search-button">
-          Buscar
+          {t('filterButton')}
         </button>
       </form>
     </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 import { fetchMonsterBySlug, normalizeMonster } from '../services/open5eApi';
 import StatBlock from '../components/StatBlock';
 import '../styles/MonsterPage.css';
@@ -9,6 +10,7 @@ const MonsterPage = () => {
   const [monster, setMonster] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const loadMonster = async () => {
@@ -16,13 +18,13 @@ const MonsterPage = () => {
         setLoading(true);
         const data = await fetchMonsterBySlug(id);
         if (!data) {
-          setError('Monstro não encontrado');
+          setError(t('monsterNotFound'));
           return;
         }
         const normalized = normalizeMonster(data);
         setMonster(normalized);
       } catch (err) {
-        setError('Monstro não encontrado');
+        setError(t('monsterNotFound'));
         console.error(err);
       } finally {
         setLoading(false);
@@ -30,16 +32,16 @@ const MonsterPage = () => {
     };
 
     loadMonster();
-  }, [id]);
+  }, [id, t]);
 
-  if (loading) return <div className="loading">Carregando detalhes do monstro...</div>;
+  if (loading) return <div className="loading">{t('loading')}</div>;
   if (error) return <div className="error">{error}</div>;
-  if (!monster) return <div className="not-found">Monstro não encontrado</div>;
+  if (!monster) return <div className="not-found">{t('monsterNotFound')}</div>;
 
   return (
     <div className="monster-page">
       <button className="back-button" onClick={() => window.history.back()}>
-        ← Voltar para lista
+        ← {t('back')}
       </button>
       <div className="monster-detail">
         <h1 className="monster-name">{monster.namePt || monster.name}</h1>
@@ -54,12 +56,12 @@ const MonsterPage = () => {
         {monster.image ? (
           <img src={monster.image} alt={monster.name} className="monster-image" />
         ) : (
-          <div className="placeholder-image">No image available</div>
+          <div className="placeholder-image">{t('noImage')}</div>
         )}
         <StatBlock stats={monster} />
         {monster.actions && monster.actions.length > 0 && (
           <div className="section">
-            <h2>Ações</h2>
+            <h2>{t('actions')}</h2>
             <ul className="actions-list">
               {monster.actions.map((action, index) => (
                 <li key={index} className="action-item">
@@ -71,7 +73,7 @@ const MonsterPage = () => {
         )}
         {monster.special_abilities && monster.special_abilities.length > 0 && (
           <div className="section">
-            <h2>Habilidades Especiais</h2>
+            <h2>{t('specialAbilities')}</h2>
             <ul className="abilities-list">
               {monster.special_abilities.map((ability, index) => (
                 <li key={index} className="ability-item">
@@ -83,7 +85,7 @@ const MonsterPage = () => {
         )}
         {monster.tags && monster.tags.length > 0 && (
           <div className="section tags-section">
-            <h2>Tags</h2>
+            <h2>{t('tags')}</h2>
             <div className="tags">
               {monster.tags.map((tag, index) => (
                 <span key={index} className="tag">{tag}</span>
@@ -93,7 +95,7 @@ const MonsterPage = () => {
         )}
         {monster.notes && (
           <div className="section notes-section">
-            <h2>Notes</h2>
+            <h2>{t('notes')}</h2>
             <p className="note-text">{monster.notes}</p>
           </div>
         )}

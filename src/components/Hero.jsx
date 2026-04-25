@@ -1,10 +1,17 @@
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitch from './LanguageSwitch';
 import './Hero.css';
 
 const Hero = () => {
+  const { t } = useLanguage();
+
   return (
     <header className="hero">
-      <h1 className="hero-title">Livro dos Monstros</h1>
-      <p className="hero-subtitle">Bestiário Digital de D&D 5e</p>
+      <div className="hero-top">
+        <LanguageSwitch />
+      </div>
+      <h1 className="hero-title">{t('heroTitle')}</h1>
+      <p className="hero-subtitle">{t('heroSubtitle')}</p>
     </header>
   );
 };

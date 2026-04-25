@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import './FilterBar.css';
 
 const FilterBar = ({ onFilterChange }) => {
   const [cr, setCr] = useState('');
   const [type, setType] = useState('');
   const [size, setSize] = useState('');
+  const { t } = useLanguage();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,7 +31,7 @@ const FilterBar = ({ onFilterChange }) => {
     <div className="filter-bar">
       <form onSubmit={handleSubmit} className="filter-form">
         <div className="filter-group">
-          <label htmlFor="cr">Challenge Rating</label>
+          <label htmlFor="cr">{t('filterCr')}</label>
           <input
             type="text"
             id="cr"
@@ -41,7 +43,7 @@ const FilterBar = ({ onFilterChange }) => {
           />
         </div>
         <div className="filter-group">
-          <label htmlFor="type">Tipo</label>
+          <label htmlFor="type">{t('filterType')}</label>
           <input
             type="text"
             id="type"
@@ -53,7 +55,7 @@ const FilterBar = ({ onFilterChange }) => {
           />
         </div>
         <div className="filter-group">
-          <label htmlFor="size">Tamanho</label>
+          <label htmlFor="size">{t('filterSize')}</label>
           <input
             type="text"
             id="size"
@@ -65,10 +67,10 @@ const FilterBar = ({ onFilterChange }) => {
           />
         </div>
         <button type="submit" className="filter-button">
-          Filtrar
+          {t('filterButton')}
         </button>
         <button type="button" onClick={handleReset} className="filter-button reset">
-          Limpar
+          {t('clearButton')}
         </button>
       </form>
     </div>

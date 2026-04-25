@@ -1,6 +1,9 @@
+import { useLanguage } from '../context/LanguageContext';
 import './Pagination.css';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+  const { t } = useLanguage();
+  
   if (totalPages <= 1) return null;
 
   const getVisiblePages = () => {
@@ -38,7 +41,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         className="page-btn nav-btn"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
-        title="Página anterior"
+        title={t('previous')}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="15 18 9 12 15 6"></polyline>
@@ -46,7 +49,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       </button>
 
       <div className="pages-container">
-        {pages.map((page, index) => {
+        {pages.map((page) => {
           if (page === 'ellipsis-start' || page === 'ellipsis-end') {
             return <span key={page} className="ellipsis">•••</span>;
           }
@@ -66,7 +69,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         className="page-btn nav-btn"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
-        title="Próxima página"
+        title={t('next')}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="9 18 15 12 9 6"></polyline>

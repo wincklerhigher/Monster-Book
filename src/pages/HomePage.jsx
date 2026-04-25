@@ -5,6 +5,7 @@ import FilterBar from '../components/FilterBar';
 import MonsterCard from '../components/MonsterCard';
 import Pagination from '../components/Pagination';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import { useLanguage } from '../context/LanguageContext';
 import { fetchMonsters, normalizeMonster } from '../services/open5eApi';
 import { mergeAllWithOverrides } from '../services/overrides';
 import '../styles/HomePage.css';
@@ -22,6 +23,7 @@ const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({ cr: '', type: '', size: '' });
   const [hasMore, setHasMore] = useState(true);
+  const { t } = useLanguage();
 
   const loadMonsters = useCallback(async (page) => {
     try {
@@ -146,15 +148,15 @@ const HomePage = () => {
       
       <div className="results-header">
         <p className="results-count">
-          {totalCount > 0 ? `${totalCount.toLocaleString()} monstros` : 'Carregando...'}
+          {totalCount > 0 ? `${totalCount.toLocaleString()} ${t('monsters')}` : t('loading')}
         </p>
         <select 
           className="sort-select"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
         >
-          <option value="name">Ordenar por Nome</option>
-          <option value="cr">Ordenar por CR</option>
+          <option value="name">{t('sortByName')}</option>
+          <option value="cr">{t('sortByCr')}</option>
         </select>
       </div>
 
@@ -165,8 +167,8 @@ const HomePage = () => {
           <LoadingSkeleton />
         ) : sortedMonsters.length === 0 ? (
           <div className="empty-state">
-            <p>Nenhum monstro encontrado com os critérios atuais.</p>
-            <p className="empty-hint">Tente ajustar os filtros ou buscar outro termo.</p>
+            <p>{t('noMonsters')}</p>
+            <p className="empty-hint">{t('tryAdjust')}</p>
           </div>
         ) : (
           sortedMonsters.map(monster => (
