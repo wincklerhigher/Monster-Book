@@ -1,4 +1,4 @@
-import { useLanguage } from './LanguageContext';
+import { useLanguage } from '../context/LanguageContext';
 import './LanguageSwitch.css';
 
 const LanguageSwitch = () => {
