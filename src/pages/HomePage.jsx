@@ -175,27 +175,11 @@ const HomePage = () => {
       </div>
 
       {!loading && totalPages > 1 && (
-        <div className="pagination">
-          <button
-            className="page-btn prev"
-            disabled={currentPage === 1}
-            onClick={() => handlePageChange(currentPage - 1)}
-          >
-            ← Anterior
-          </button>
-
-          <span className="page-info">
-            Página {currentPage} de {totalPages}
-          </span>
-
-          <button
-            className="page-btn next"
-            disabled={currentPage >= totalPages || !hasMore}
-            onClick={() => handlePageChange(currentPage + 1)}
-          >
-            Próxima →
-          </button>
-        </div>
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={handlePageChange} 
+        />
       )}
     </>
   );
