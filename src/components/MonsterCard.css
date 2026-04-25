@@ -41,7 +41,7 @@
 }
 
 .card-image {
-  height: 180px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -75,8 +75,18 @@
   height: 100%;
 }
 
+.monster-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
 .type-initial {
-  font-size: 4rem;
+  font-size: 3rem;
   font-weight: 700;
   color: rgba(212, 168, 85, 0.15);
   text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
