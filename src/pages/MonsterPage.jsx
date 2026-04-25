@@ -15,10 +15,14 @@ const MonsterPage = () => {
       try {
         setLoading(true);
         const data = await fetchMonsterBySlug(id);
+        if (!data) {
+          setError('Monstro não encontrado');
+          return;
+        }
         const normalized = normalizeMonster(data);
         setMonster(normalized);
       } catch (err) {
-        setError('Falha ao carregar detalhes do monstro');
+        setError('Monstro não encontrado');
         console.error(err);
       } finally {
         setLoading(false);

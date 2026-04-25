@@ -34,6 +34,13 @@
       "image": "https://5e.tools/img/monsters/Skeleton.jpg",
       "tags": ["undead", "low-level"],
       "notes": "Encontro fácil para Party de nível 1-2. Use em grupos para criar tensão."
+    },
+    {
+      "id": "accursed-guardian-naga",
+      "name": "Accursed Guardian Naga",
+      "skip": true,
+      "tags": [],
+      "notes": "Não disponível na API Open5e"
     }
   ]
 }

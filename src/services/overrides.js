@@ -9,6 +9,7 @@ export const getOverride = (id) => overrides.get(id) || null;
 export const mergeWithOverride = (monster) => {
   const override = overrides.get(monster.id);
   if (!override) return monster;
+  if (override.skip) return null;
 
   return {
     ...monster,
@@ -19,7 +20,7 @@ export const mergeWithOverride = (monster) => {
 };
 
 export const mergeAllWithOverrides = (monsters) => {
-  return monsters.map(mergeWithOverride);
+  return monsters.map(mergeWithOverride).filter(Boolean);
 };
 
 export default { getOverride, mergeWithOverride, mergeAllWithOverrides };
