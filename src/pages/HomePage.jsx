@@ -3,6 +3,7 @@ import Hero from '../components/Hero';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
 import MonsterCard from '../components/MonsterCard';
+import Pagination from '../components/Pagination';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { fetchMonsters, normalizeMonster } from '../services/open5eApi';
 import { mergeAllWithOverrides } from '../services/overrides';
