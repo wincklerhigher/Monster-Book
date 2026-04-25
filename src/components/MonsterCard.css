@@ -1,0 +1,133 @@
+.monster-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.monster-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-gold), var(--accent-arcane), var(--accent-gold));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.monster-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-card), var(--shadow-glow);
+}
+
+.monster-card:hover::before {
+  opacity: 1;
+}
+
+.card-image {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.card-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg-card) 0%, transparent 50%);
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.monster-card:hover .card-image img {
+  transform: scale(1.05);
+}
+
+.card-image .placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 1;
+}
+
+.placeholder-icon {
+  font-size: 3.5rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.placeholder-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  opacity: 0.6;
+}
+
+.card-content {
+  padding: 1.25rem;
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+}
+
+.card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge.cr {
+  background: rgba(212, 168, 85, 0.15);
+  color: var(--accent-gold);
+  border: 1px solid var(--border-gold);
+}
+
+.badge.type {
+  background: rgba(107, 91, 149, 0.2);
+  color: #9b8dc7;
+  border: 1px solid rgba(107, 91, 149, 0.3);
+}
+
+.badge.size {
+  background: rgba(161, 61, 61, 0.15);
+  color: #c76e6e;
+  border: 1px solid rgba(161, 61, 61, 0.3);
+}
+
+.badge.alignment {
+  background: rgba(107, 91, 149, 0.15);
+  color: #8b7fb5;
+  border: 1px solid rgba(107, 91, 149, 0.25);
+}
