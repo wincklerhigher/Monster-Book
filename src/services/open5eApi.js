@@ -77,7 +77,12 @@ const parseHitPoints = (hp) => {
 
 const parseActions = (actions) => {
   if (!actions) return [];
-  if (Array.isArray(actions)) return actions;
+  if (Array.isArray(actions)) {
+    return actions.map(a => ({
+      name: a.name || `Action`,
+      description: a.desc || a.description || '',
+    }));
+  }
   return actions.split('\n').filter(Boolean).map((action, i) => ({
     name: `Action ${i + 1}`,
     description: action.trim(),
@@ -86,7 +91,12 @@ const parseActions = (actions) => {
 
 const parseSpecialAbilities = (abilities) => {
   if (!abilities) return [];
-  if (Array.isArray(abilities)) return abilities;
+  if (Array.isArray(abilities)) {
+    return abilities.map(a => ({
+      name: a.name || `Ability`,
+      description: a.desc || a.description || '',
+    }));
+  }
   return abilities.split('\n').filter(Boolean).map((ability, i) => ({
     name: `Special Ability ${i + 1}`,
     description: ability.trim(),
