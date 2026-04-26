@@ -2,7 +2,7 @@
 
 Um catálogo interativo de criaturas para D&D 5ª Edição, com dados da API Open5e.
 
-## Demo
+## Demonstração
 
 Acesse: https://wincklerhigher.github.io/Monster-Book/
 
