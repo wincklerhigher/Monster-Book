@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Hero from '../components/Hero';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
@@ -8,9 +8,53 @@ import LoadingSkeleton from '../components/LoadingSkeleton';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchMonsters, normalizeMonster } from '../services/open5eApi';
 import { mergeAllWithOverrides } from '../services/overrides';
+import { getNotFoundList } from '../services/notFoundStore';
 import '../styles/HomePage.css';
 
 const ITEMS_PER_PAGE = 24;
+
+const parseCR = (cr) => {
+  if (!cr || cr === 'Unknown') return 0;
+  if (cr.includes('/')) {
+    const [num, den] = cr.split('/').map(Number);
+    return num / den;
+  }
+  return parseFloat(cr) || 0;
+};
+
+const normalizeName = (name) => {
+  return name
+    .toLowerCase()
+    .replace(/\s*(wyrmling|young|elder|progenitor|adult|ancient|veteran|master|lesser|greater|half|half-\w+|pawn|brood|spawn)\s*/gi, ' ')
+    .replace(/\s*\(.*?\)\s*/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const deduplicateMonsters = (monsters) => {
+  const seen = new Map();
+  return monsters.filter(monster => {
+    const baseName = getBaseName(monster.name);
+    if (!seen.has(baseName)) {
+      seen.set(baseName, monster);
+      return true;
+    }
+    const existing = seen.get(baseName);
+    const existingCR = parseCR(existing.challenge_rating);
+    const newCR = parseCR(monster.challenge_rating);
+    if (newCR > existingCR) {
+      seen.set(baseName, monster);
+      return true;
+    }
+    return false;
+  });
+};
+
+const getBaseName = (name) => {
+  const normalized = normalizeName(name);
+  const parts = normalized.split(' ');
+  return parts[0];
+};
 
 const HomePage = () => {
   const [monsters, setMonsters] = useState([]);
@@ -22,7 +66,7 @@ const HomePage = () => {
   const [sortBy, setSortBy] = useState('name');
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({ cr: '', type: '', size: '' });
-  const [hasMore, setHasMore] = useState(true);
+  const notFoundList = useState(() => getNotFoundList())[0];
   const { t } = useLanguage();
 
   const loadMonsters = useCallback(async (page) => {
@@ -30,7 +74,7 @@ const HomePage = () => {
       setLoading(true);
       setError(null);
       
-      const { monsters: fetchedMonsters, count, next } = await fetchMonsters({ 
+      const { monsters: fetchedMonsters, count } = await fetchMonsters({ 
         page, 
         search: searchQuery, 
         cr: filters.cr 
@@ -40,10 +84,9 @@ const HomePage = () => {
       const deduplicated = deduplicateMonsters(normalized);
       const withOverrides = mergeAllWithOverrides(deduplicated);
       setMonsters(withOverrides);
-      setTotalCount(count);
-      setTotalPages(Math.ceil(count / ITEMS_PER_PAGE));
-      setHasMore(!!next);
-    } catch (err) {
+        setTotalCount(count);
+        setTotalPages(Math.ceil(count / ITEMS_PER_PAGE));
+      } catch (err) {
       setError('Falha ao carregar monstros. Tente novamente.');
       console.error(err);
     } finally {
@@ -76,49 +119,6 @@ const HomePage = () => {
     }
   };
 
-  const parseCR = (cr) => {
-    if (!cr || cr === 'Unknown') return 0;
-    if (cr.includes('/')) {
-      const [num, den] = cr.split('/').map(Number);
-      return num / den;
-    }
-    return parseFloat(cr) || 0;
-  };
-
-  const normalizeName = (name) => {
-    return name
-      .toLowerCase()
-      .replace(/\s*(wyrmling|young|elder|progenitor|adult|ancient|veteran|master|lesser|greater|half|half-\w+|pawn|brood|spawn)\s*/gi, ' ')
-      .replace(/\s*\(.*?\)\s*/gi, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
-
-  const getBaseName = (name) => {
-    const normalized = normalizeName(name);
-    const parts = normalized.split(' ');
-    return parts[0];
-  };
-
-  const deduplicateMonsters = (monsters) => {
-    const seen = new Map();
-    return monsters.filter(monster => {
-      const baseName = getBaseName(monster.name);
-      if (!seen.has(baseName)) {
-        seen.set(baseName, monster);
-        return true;
-      }
-      const existing = seen.get(baseName);
-      const existingCR = parseCR(existing.challenge_rating);
-      const newCR = parseCR(monster.challenge_rating);
-      if (newCR > existingCR) {
-        seen.set(baseName, monster);
-        return true;
-      }
-      return false;
-    });
-  };
-
   const sortedMonsters = [...monsters].sort((a, b) => {
     if (filters.size) {
       const sizeMatch = a.size.toLowerCase().includes(filters.size.toLowerCase());
@@ -129,6 +129,9 @@ const HomePage = () => {
     }
     return a.name.localeCompare(b.name);
   }).filter(m => {
+    if (notFoundList.includes(m.id)) {
+      return false;
+    }
     if (filters.size && !m.size.toLowerCase().includes(filters.size.toLowerCase())) {
       return false;
     }

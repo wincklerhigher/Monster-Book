@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchMonsterBySlug, normalizeMonster } from '../services/open5eApi';
+import { addNotFoundMonster, removeFromNotFoundList } from '../services/notFoundStore';
 import LanguageSwitch from '../components/LanguageSwitch';
 import StatBlock from '../components/StatBlock';
 import '../styles/MonsterPage.css';
@@ -14,18 +15,21 @@ const MonsterPage = () => {
   const { t } = useLanguage();
 
   useEffect(() => {
+    removeFromNotFoundList(id);
     const loadMonster = async () => {
       try {
         setLoading(true);
         const data = await fetchMonsterBySlug(id);
         if (!data) {
           setError(t('monsterNotFound'));
+          addNotFoundMonster(id);
           return;
         }
         const normalized = normalizeMonster(data);
         setMonster(normalized);
       } catch (err) {
         setError(t('monsterNotFound'));
+        addNotFoundMonster(id);
         console.error(err);
       } finally {
         setLoading(false);
