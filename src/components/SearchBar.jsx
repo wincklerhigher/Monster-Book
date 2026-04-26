@@ -22,7 +22,7 @@ const SearchBar = ({ onSearch }) => {
           className="search-input"
         />
         <button type="submit" className="search-button">
-          {t('filterButton')}
+          {t('searchButton')}
         </button>
       </form>
     </div>

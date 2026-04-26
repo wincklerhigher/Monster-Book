@@ -67,7 +67,7 @@ const FilterBar = ({ onFilterChange }) => {
           />
         </div>
         <button type="submit" className="filter-button">
-          {t('filterButton')}
+          {t('applyFilter')}
         </button>
         <button type="button" onClick={handleReset} className="filter-button reset">
           {t('clearButton')}
