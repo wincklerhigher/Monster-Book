@@ -1,5 +1,5 @@
 import './styles/App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import LoadingSkeleton from './components/LoadingSkeleton';
@@ -10,7 +10,7 @@ const MonsterPage = lazy(() => import('./pages/MonsterPage'));
 function App() {
   return (
     <LanguageProvider>
-        <Router basename="">
+        <Router>
         <div className="App">
           <Suspense fallback={<LoadingSkeleton />}>
             <Routes>
