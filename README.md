@@ -6,7 +6,6 @@ Um catálogo interativo de criaturas para D&D 5ª Edição, com dados da API Ope
 
 Acesse: https://wincklerhigher.github.io/Monster-Book/
 
-**Nota:** A aplicação usa HashRouter, então as URLs usam formato `#/monster/id` (ex: `/#/monster/goblin`).
 
 ## Funcionalidades
 
