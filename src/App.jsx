@@ -7,7 +7,7 @@ import MonsterPage from './pages/MonsterPage';
 function App() {
   return (
     <LanguageProvider>
-      <Router>
+      <Router basename="/Monster-Book">
         <div className="App">
           <Routes>
             <Route path="/" element={<HomePage />} />
