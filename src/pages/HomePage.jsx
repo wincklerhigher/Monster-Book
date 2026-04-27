@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Hero from '../components/Hero';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
 import MonsterCard from '../components/MonsterCard';
 import Pagination from '../components/Pagination';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import Footer from '../components/Footer';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchMonsters, normalizeMonster } from '../services/open5eApi';
 import { mergeAllWithOverrides } from '../services/overrides';
@@ -119,27 +120,29 @@ const HomePage = () => {
     }
   };
 
-  const sortedMonsters = [...monsters].sort((a, b) => {
-    if (filters.size) {
-      const sizeMatch = a.size.toLowerCase().includes(filters.size.toLowerCase());
-      if (!sizeMatch) return 1;
-    }
-    if (sortBy === 'cr') {
-      return parseCR(a.challenge_rating) - parseCR(b.challenge_rating);
-    }
-    return a.name.localeCompare(b.name);
-  }).filter(m => {
-    if (notFoundList.includes(m.id)) {
-      return false;
-    }
-    if (filters.size && !m.size.toLowerCase().includes(filters.size.toLowerCase())) {
-      return false;
-    }
-    if (filters.type && !m.type.toLowerCase().includes(filters.type.toLowerCase())) {
-      return false;
-    }
-    return true;
-  });
+  const sortedMonsters = useMemo(() => {
+    return [...monsters].sort((a, b) => {
+      if (filters.size) {
+        const sizeMatch = a.size.toLowerCase().includes(filters.size.toLowerCase());
+        if (!sizeMatch) return 1;
+      }
+      if (sortBy === 'cr') {
+        return parseCR(a.challenge_rating) - parseCR(b.challenge_rating);
+      }
+      return a.name.localeCompare(b.name);
+    }).filter(m => {
+      if (notFoundList.includes(m.id)) {
+        return false;
+      }
+      if (filters.size && !m.size.toLowerCase().includes(filters.size.toLowerCase())) {
+        return false;
+      }
+      if (filters.type && !m.type.toLowerCase().includes(filters.type.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  }, [monsters, sortBy, filters, notFoundList]);
 
   if (loading && monsters.length === 0) return <LoadingSkeleton />;
 
@@ -187,6 +190,7 @@ const HomePage = () => {
           onPageChange={handlePageChange} 
         />
       )}
+      <Footer />
     </>
   );
 };

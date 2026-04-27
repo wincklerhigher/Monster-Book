@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Link } from 'react-router-dom';
 import './MonsterCard.css';
 
@@ -33,11 +33,12 @@ const MonsterCard = ({ monster }) => {
       <div className="monster-card">
         <div className="card-image" style={{ background: getGradientForType(monster.type) }}>
           {monster.image && !imageError ? (
-            <img
-              src={monster.image}
-              alt={monster.name}
-              onError={() => setImageError(true)}
-            />
+             <img
+               src={monster.image}
+               alt={monster.name}
+               loading="lazy"
+               onError={() => setImageError(true)}
+             />
           ) : (
             <div className="placeholder" style={{ background: getGradientForType(monster.type) }}>
               <span className="type-initial">{displayName.charAt(0).toUpperCase()}</span>
@@ -57,4 +58,6 @@ const MonsterCard = ({ monster }) => {
   );
 };
 
-export default MonsterCard;
+export default memo(MonsterCard, (prevProps, nextProps) => {
+  return prevProps.monster.id === nextProps.monster.id;
+});

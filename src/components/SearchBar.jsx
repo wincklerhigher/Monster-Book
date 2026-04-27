@@ -1,10 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useDebounce } from '../hooks/useDebounce';
 import './SearchBar.css';
 
 const SearchBar = ({ onSearch }) => {
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 300);
   const { t } = useLanguage();
+
+  // Call onSearch when debounced query changes, not on every keystroke
+  useEffect(() => {
+    if (debouncedQuery !== '') {
+      onSearch(debouncedQuery);
+    }
+  }, [debouncedQuery, onSearch]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

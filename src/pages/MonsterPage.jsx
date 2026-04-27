@@ -5,6 +5,7 @@ import { fetchMonsterBySlug, normalizeMonster } from '../services/open5eApi';
 import { addNotFoundMonster, removeFromNotFoundList } from '../services/notFoundStore';
 import LanguageSwitch from '../components/LanguageSwitch';
 import StatBlock from '../components/StatBlock';
+import Footer from '../components/Footer';
 import '../styles/MonsterPage.css';
 
 const MonsterPage = () => {
@@ -62,7 +63,7 @@ const MonsterPage = () => {
           )}
         </div>
         {monster.image ? (
-          <img src={monster.image} alt={monster.name} className="monster-image" />
+          <img src={monster.image} alt={monster.name} className="monster-image" loading="lazy" />
         ) : (
           <div className="placeholder-image">{t('noImage')}</div>
         )}
@@ -105,11 +106,12 @@ const MonsterPage = () => {
           <div className="section notes-section">
             <h2>{t('notes')}</h2>
             <p className="note-text">{monster.notes}</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+           </div>
+         )}
+       </div>
+       <Footer />
+     </div>
+   );
 };
 
 export default MonsterPage;

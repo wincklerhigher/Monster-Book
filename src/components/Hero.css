@@ -9,8 +9,24 @@
 
 .hero-top {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.creator-link {
+  font-size: 0.875rem;
+  color: var(--accent-gold);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.creator-link:hover {
+  opacity: 1;
+  text-decoration: underline;
 }
 
 .hero::before {
