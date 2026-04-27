@@ -6,68 +6,70 @@ const typeData = {
   dragão: {
     icon: '🐉',
     gradient: 'linear-gradient(135deg, #6b1a1a 0%, #8b2525 50%, #a52a2a 100%)',
-    badge: 'dragão'
+    badge: 'dragão',
   },
   'morto-vivo': {
     icon: '💀',
     gradient: 'linear-gradient(135deg, #1a1a2e 0%, #4a0e4a 50%, #6b1a1a 100%)',
-    badge: 'morto-vivo'
+    badge: 'morto-vivo',
   },
   besta: {
     icon: '🦁',
     gradient: 'linear-gradient(135deg, #4a5016 0%, #654321 50%, #2d5016 100%)',
-    badge: 'besta'
+    badge: 'besta',
   },
   elemento: {
     icon: '🔥',
     gradient: 'linear-gradient(135deg, #cc3700 0%, #ff4500 50%, #b8860b 100%)',
-    badge: 'elemento'
+    badge: 'elemento',
   },
   demônio: {
     icon: '😈',
     gradient: 'linear-gradient(135deg, #4a0000 0%, #6b0000 50%, #8b0000 100%)',
-    badge: 'demônio'
+    badge: 'demônio',
   },
   humanoide: {
     icon: '👤',
     gradient: 'linear-gradient(135deg, #191970 0%, #4169e1 50%, #4682b4 100%)',
-    badge: 'humanoide'
+    badge: 'humanoide',
   },
   gigante: {
     icon: '👺',
     gradient: 'linear-gradient(135deg, #696969 0%, #8b7355 50%, #daa520 100%)',
-    badge: 'gigante'
+    badge: 'gigante',
   },
   aberração: {
     icon: '👁️',
     gradient: 'linear-gradient(135deg, #4b0082 0%, #8b008b 50%, #9370db 100%)',
-    badge: 'aberração'
+    badge: 'aberração',
   },
   fey: {
     icon: '🧚',
     gradient: 'linear-gradient(135deg, #228b22 0%, #20b2aa 50%, #3cb371 100%)',
-    badge: 'fey'
+    badge: 'fey',
   },
   monstro: {
     icon: '👹',
     gradient: 'linear-gradient(135deg, #8b0000 0%, #c71585 50%, #dc143c 100%)',
-    badge: 'monstro'
+    badge: 'monstro',
   },
   construção: {
     icon: '⚙️',
     gradient: 'linear-gradient(135deg, #2f4f4f 0%, #006666 50%, #4682b4 100%)',
-    badge: 'construção'
+    badge: 'construção',
   },
   default: {
     icon: '🐺',
     gradient: 'linear-gradient(135deg, #2d2d5f 0%, #4a4a6e 50%, #6a6a8e 100%)',
-    badge: 'geral'
-  }
+    badge: 'geral',
+  },
 };
 
 const MonsterCard = ({ monster }) => {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [searchParams] = useSearchParams();
+
   const displayName = monster.namePt || monster.name;
   const monsterType = monster.type?.toLowerCase() || 'default';
   const typeInfo = typeData[monsterType] || typeData.default;
@@ -89,10 +91,13 @@ const MonsterCard = ({ monster }) => {
     return 'Lendário';
   };
 
-  const [searchParams] = useSearchParams();
+  // Build the URL preserving current query params (page, search, filters)
+  const queryString = searchParams.toString();
+  const target = `/monster/${monster.slug}${queryString ? `?${queryString}` : ''}`;
+
   return (
-    <Link 
-      to={`/monster/${monster.id}?${searchParams.toString()}`} 
+    <Link
+      to={target}
       className="monster-card"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -158,11 +163,9 @@ const MonsterCard = ({ monster }) => {
             </div>
 
             {/* Hover Effect */}
-            {isHovered && (
-              <div className="card-glow"></div>
-            )}
+            {isHovered && <div className="card-glow"></div>}
           </div>
-          
+
           {/* Card Border */}
           <div className="card-border"></div>
         </div>
@@ -171,6 +174,4 @@ const MonsterCard = ({ monster }) => {
   );
 };
 
-export default memo(MonsterCard, (prevProps, nextProps) => {
-  return prevProps.monster.id === nextProps.monster.id;
-});
+export default memo(MonsterCard, (prev, next) => prev.monster.id === next.monster.id);

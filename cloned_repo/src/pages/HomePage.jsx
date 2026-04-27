@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import Hero from '../components/Hero';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
@@ -13,7 +13,7 @@ import { useMonsterStore } from '../context/MonsterStoreContext';
 import { fetchMonsters, normalizeMonster } from '../services/open5eApi';
 import { mergeAllWithOverrides } from '../services/overrides';
 import { enrichMonsterWithScenario } from '../services/scenarioService';
-import { normalizeFilterValue, normalizeFilterForComparison } from '../services/filterMapper';
+import { normalizeFilterValue } from '../services/filterMapper';
 import { getNotFoundList } from '../services/notFoundStore';
 import '../styles/HomePage.css';
 
@@ -36,33 +36,41 @@ const normalizeName = (name) =>
     .replace(/\s+/g, ' ')
     .trim();
 
+const getBaseName = (name) => normalizeName(name).split(' ')[0];
+
 const deduplicateMonsters = (monsters) => {
   const seen = new Map();
+
   return monsters.filter((monster) => {
     const baseName = getBaseName(monster.name);
+
     if (!seen.has(baseName)) {
       seen.set(baseName, monster);
       return true;
     }
+
     const existing = seen.get(baseName);
+
     if (parseCR(monster.challenge_rating) > parseCR(existing.challenge_rating)) {
       seen.set(baseName, monster);
       return true;
     }
+
     return false;
   });
 };
 
-const getBaseName = (name) => {
-  const normalized = normalizeName(name);
-  return normalized.split(' ')[0];
-};
-
 const HomePage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
-  const { monsters: storeMonsters, page: storePage, totalPages: storeTotalPages, setMonsters: setStoreMonsters, setPage: setStorePage, setTotalPages: setStoreTotalPages } = useMonsterStore();
+
+  const {
+    monsters: storeMonsters,
+    setMonsters: setStoreMonsters,
+    setPage: setStorePage,
+    setTotalPages: setStoreTotalPages,
+  } = useMonsterStore();
 
   const pageParam = parseInt(searchParams.get('page') || '1', 10);
   const queryParam = searchParams.get('search') || '';
@@ -72,12 +80,11 @@ const HomePage = () => {
   const regionParam = searchParams.get('region') || '';
   const environmentParam = searchParams.get('environment') || '';
 
-  const [monsters, setMonsters] = useState(storeMonsters.length > 0 ? storeMonsters : []);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(storeTotalPages > 1 ? storeTotalPages : 1);
+  const [monsters, setMonsters] = useState(storeMonsters.length ? storeMonsters : []);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(storePage > 1 ? storePage : pageParam);
+  const [currentPage, setCurrentPage] = useState(pageParam);
   const [sortBy, setSortBy] = useState('name');
   const [searchQuery, setSearchQuery] = useState(queryParam);
   const [filters, setFilters] = useState({
@@ -85,196 +92,101 @@ const HomePage = () => {
     type: typeParam,
     size: sizeParam,
     region: regionParam,
-    environment: environmentParam
+    environment: environmentParam,
   });
-  const notFoundList = useMemo(() => getNotFoundList(), []);
-  const [extraPages, setExtraPages] = useState(0);
 
-  // Sync state with URL params - clear if not in URL
+  const [extraPages, setExtraPages] = useState(0);
   const [resetKey, setResetKey] = useState(0);
 
-  // Detect back navigation from monster page  const location = useLocation();
+  const notFoundList = useMemo(() => getNotFoundList(), []);
+
   const isBackNav = useRef(false);
-  const skipFetch = useRef(false);
   const isInitialMount = useRef(true);
 
+  // 🔥 Detecta navegação (back/forward)
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
     }
-    skipFetch.current = true;
+
     isBackNav.current = true;
+
     const timer = setTimeout(() => {
       isBackNav.current = false;
-      skipFetch.current = false;
-    }, 100);
+    }, 50);
+
     return () => clearTimeout(timer);
   }, [location.key]);
 
-  // Sync state with URL params - clear if not in URL
+  // 🔥 URL → STATE (quando volta)
   useEffect(() => {
-    if (isBackNav.current) return; // Skip reset when coming back from monster page
+    if (!isBackNav.current) return;
+
     setSearchQuery(queryParam);
     setFilters({
       cr: crParam,
       type: typeParam,
       size: sizeParam,
       region: regionParam,
-      environment: environmentParam
+      environment: environmentParam,
     });
-  }, [queryParam, crParam, typeParam, sizeParam, regionParam, environmentParam]);
+    setCurrentPage(pageParam);
+  }, [location.key]);
 
-  // clear search when region filter is used
+  // 🔥 STATE → URL (uso normal)
   useEffect(() => {
-    if (filters.region && searchQuery) {
-      setSearchQuery('');
+    if (isBackNav.current) return;
+
+    const params = new URLSearchParams();
+
+    if (searchQuery) params.set('search', searchQuery);
+    if (filters.cr) params.set('cr', filters.cr);
+    if (filters.type) params.set('type', filters.type);
+    if (filters.size) params.set('size', filters.size);
+    if (filters.region) params.set('region', filters.region);
+    if (filters.environment) params.set('environment', filters.environment);
+    if (currentPage !== 1) params.set('page', String(currentPage));
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
     }
-  }, [filters.region]);
+  }, [searchQuery, filters, currentPage]);
 
-  // load data whenever page, search or filters change
+  // 🔥 FETCH
   useEffect(() => {
-    if (skipFetch.current) return;
-
     let cancelled = false;
-    const timeoutId = setTimeout(() => {
-      if (!cancelled) {
-        setLoading(false);
-        setError('Tempo limite excedido. Tente novamente.');
-      }
-    }, 10000);
 
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const hasLocalFilters = filters.size || filters.type || filters.region;
+        const { monsters: fetchedMonsters, count } = await fetchMonsters({
+          page: currentPage,
+          search: searchQuery,
+          cr: filters.cr,
+        });
 
-        // If region or environment filter, search for related terms
-        if (hasLocalFilters) {
-          const regionSearch = {
-            'north': 'frost giant orc wolf yeti mammoth',
-            'sword-coast': 'dwarf humanoid',
-            'underdark': 'drow aboleth'
-          };
-          const envSearch = {
-            'underdark': 'drow',
-            'forest': 'wolf',
-            'swamp': 'crocodile',
-            'mountain': 'giant',
-            'desert': 'scorpion',
-            'cave': 'troll'
-          };
+        const normalized = fetchedMonsters.map(normalizeMonster);
+        const deduped = deduplicateMonsters(normalized);
+        const withOverrides = mergeAllWithOverrides(deduped);
+        const withScenario = withOverrides.map(enrichMonsterWithScenario);
 
-          // When filter is active, use filter's search term
-          let searchTerm = searchQuery;
-          if (!searchTerm && filters.region) {
-            searchTerm = regionSearch[filters.region];
-          }
+        if (cancelled) return;
 
-          // Also use type as search term if set
-          if (!searchTerm && filters.type) {
-            const typeSearch = {
-              'Dragão': 'dragon',
-              'Morto-vivo': 'undead',
-              'Besta': 'beast',
-              'Humanoide': 'humanoid',
-              'Monstro': 'monstrosity',
-              'Elemental': 'elemental',
-              'Aberração': 'aberration',
-              'Fey': 'fey',
-              'Gigante': 'giant'
-            };
-            searchTerm = typeSearch[filters.type] || filters.type;
-          }
+        setMonsters(withScenario);
+        setStoreMonsters(withScenario);
+        setStorePage(currentPage);
 
-          console.log('Filters:', filters, 'SearchTerm:', searchTerm || '(none)');
+        const pages = Math.min(Math.ceil(count / ITEMS_PER_PAGE), 65);
+        setTotalPages(pages);
+        setStoreTotalPages(pages);
 
-          let allMonsters = [];
-          let totalCount = 0;
-
-          // Load more pages when filter is active - parallel fetch
-          const pagesToFetch = filters.region ? 3 : 1;
-          // Pages are 1-indexed; ensure we request the correct page numbers
-          const fetchPromises = Array.from({ length: pagesToFetch }, (_, i) => 
-            fetchMonsters({ page: i + 1, search: searchTerm, cr: filters.cr })
-          );
-
-          const results = await Promise.all(fetchPromises);
-
-          // Aggregate monsters and total count from all fetched pages
-          results.forEach((result, idx) => {
-            const fetchedMonsters = result.monsters;
-            const count = result.count;
-            if (fetchedMonsters.length === 0) {
-              console.log('No more results, stopping');
-              return;
-            }
-            console.log('Page', idx + 1, 'got', fetchedMonsters.length, 'monsters');
-            const normalized = fetchedMonsters.map(normalizeMonster);
-            const deduped = deduplicateMonsters(normalized);
-            allMonsters = [...allMonsters, ...deduped];
-            // Sum counts from each page to get the overall total
-            totalCount += count;
-          });
-
-          if (cancelled) return;
-
-          const withOverrides = mergeAllWithOverrides(allMonsters);
-          const withScenario = withOverrides.map(enrichMonsterWithScenario);
-          console.log('Loaded:', withScenario.length);
-
-          setMonsters(withScenario);
-          setTotalCount(totalCount);
-          setExtraPages(0);
-          setStoreMonsters(withScenario);
-          setStorePage(currentPage);
-          setStoreTotalPages(1);
-        } else {
-          // Sem filtros locais - comportamento normal paginado
-          const { monsters: fetchedMonsters, count } = await fetchMonsters({
-            page: currentPage,
-            search: searchQuery,
-            cr: filters.cr,
-          });
-
-          const normalized = fetchedMonsters.map(normalizeMonster);
-          const deduped = deduplicateMonsters(normalized);
-          const withOverrides = mergeAllWithOverrides(deduped);
-          const withScenario = withOverrides.map(enrichMonsterWithScenario);
-          setMonsters(withScenario);
-          setTotalCount(count);
-          setStoreMonsters(withScenario);
-          setStorePage(currentPage);
-
-          let calculatedPages = Math.ceil(count / ITEMS_PER_PAGE);
-          if (calculatedPages > 65) {
-            calculatedPages = 65;
-          }
-          setTotalPages(calculatedPages);
-          setStoreTotalPages(calculatedPages);
-          if (currentPage > calculatedPages) {
-            setCurrentPage(calculatedPages);
-          }
-        }
-
-        setLoading(false);
       } catch (e) {
-        console.error('Fetch error:', e, 'Filters:', filters);
-        if (e.message.includes('404')) {
-          const lastPage = Math.max(1, currentPage - 1);
-          setCurrentPage(lastPage);
-          setTotalPages(lastPage);
-        } else {
-          setError('Falha ao carregar monstros. Tente novamente.');
-        }
-        console.error(e);
-      }
-
-      if (!cancelled) {
-        setLoading(false);
-        clearTimeout(timeoutId);
+        setError('Falha ao carregar monstros.');
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
 
@@ -282,48 +194,18 @@ const HomePage = () => {
 
     return () => {
       cancelled = true;
-      clearTimeout(timeoutId);
     };
-  }, [currentPage, searchQuery, filters]);
+  }, [currentPage, searchQuery, filters.cr]);
 
   const sortedMonsters = useMemo(() => {
-    const filtered = [...monsters]
-      .sort((a, b) => {
-        if (sortBy === 'cr') return parseCR(a.challenge_rating) - parseCR(b.challenge_rating);
-        return a.name.localeCompare(b.name);
-      })
-      .filter((m) => {
-        if (notFoundList.includes(m.id)) return false;
-
-        // Size filter
-        if (filters.size) {
-          const apiSize = normalizeFilterValue('size', filters.size);
-          const monsterSizeLower = m.size?.toLowerCase() || '';
-          if (!monsterSizeLower.includes(apiSize?.toLowerCase())) return false;
-        }
-
-        // Type filter  
-        if (filters.type) {
-          const apiType = normalizeFilterValue('type', filters.type);
-          const monsterTypeLower = m.type?.toLowerCase() || '';
-          if (!monsterTypeLower.includes(apiType?.toLowerCase())) return false;
-        }
-
-        // Region filter
-        if (filters.region) {
-          if (!m.region || m.region !== filters.region) return false;
-        }
-
-        // Environment filter - disabled (API limits)
-        // if (filters.environment) {
-        //   if (!m.environment || m.environment !== filters.environment) return false;
-        // }
-
-        return true;
-      });
-
-    return filtered;
-  }, [monsters, sortBy, filters, notFoundList]);
+    return [...monsters]
+      .sort((a, b) =>
+        sortBy === 'cr'
+          ? parseCR(a.challenge_rating) - parseCR(b.challenge_rating)
+          : a.name.localeCompare(b.name)
+      )
+      .filter((m) => !notFoundList.includes(m.id));
+  }, [monsters, sortBy, notFoundList]);
 
   const handleSearch = useCallback((query) => {
     setSearchQuery(query);
@@ -331,105 +213,56 @@ const HomePage = () => {
   }, []);
 
   const handleFilterChange = useCallback((newFilters) => {
-    const normalizedFilters = {
+    setFilters({
       cr: '',
       type: '',
       size: '',
       region: '',
       environment: '',
-      ...(newFilters || {})
-    };
-    setFilters(normalizedFilters);
+      ...(newFilters || {}),
+    });
     setCurrentPage(1);
-    setExtraPages(0);
   }, []);
 
-  // Debounce filter changes to prevent premature re-fetches
   const debouncedHandleFilterChange = useDebounce(handleFilterChange, 300);
 
-  const handleClearAll = useCallback(() => {
-    // Clear all filters and search query
+  const handleClearAll = () => {
     setSearchQuery('');
     setFilters({ cr: '', type: '', size: '', region: '', environment: '' });
-    // Remove all URL query parameters
-    setSearchParams({});
-    // Reset the search bar component state
+    setCurrentPage(1);
     setResetKey((k) => k + 1);
-  }, []);
-
-  const handlePageChange = useCallback((page) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-  }, [totalPages]);
-
-  const handleLoadMore = useCallback(async () => {
-    try {
-      setLoading(true);
-      const nextPage = extraPages + 2;
-
-      const { monsters: fetchedMonsters } = await fetchMonsters({
-        page: nextPage,
-        search: searchQuery,
-        cr: filters.cr
-      });
-
-      const normalized = fetchedMonsters.map(normalizeMonster);
-      const deduped = deduplicateMonsters(normalized);
-      const withOverrides = mergeAllWithOverrides(deduped);
-      const withScenario = withOverrides.map(enrichMonsterWithScenario);
-
-      setMonsters(prev => [...prev, ...withScenario]);
-      setExtraPages(nextPage);
-      setLoading(false);
-    } catch (e) {
-      console.error(e);
-      setLoading(false);
-    }
-  }, [extraPages, searchQuery, filters.cr]);
-
-  const shouldShowClearAll = searchQuery || filters.cr || filters.type || filters.size || filters.region;
+  };
 
   return (
     <>
       <Hero />
-      {shouldShowClearAll && (
-        <div className="clear-all-container">
-          <button className="clear-all-btn" onClick={handleClearAll}>
-            ✕ Clear All Filters
-          </button>
-        </div>
-      )}
+
       <SearchBar onSearch={handleSearch} resetKey={resetKey} />
       <FilterBar onFilterChange={debouncedHandleFilterChange} />
-      <div className="results-header">
-        <select className="sort-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-          <option value="name">{t('sortByName')}</option>
-          <option value="cr">{t('sortByCr')}</option>
-        </select>
-      </div>
+
       {loading ? (
         <LoadingSkeleton />
       ) : error ? (
-        <div className="error-container"><p className="error">{error}</p></div>
-      ) : sortedMonsters.length === 0 ? (
-        <div className="empty-state">
-          <p>{t('noMonsters')}</p>
-          <p className="empty-hint">{t('tryAdjust')}</p>
-        </div>
+        <p>{error}</p>
       ) : (
         <div className="monsters-grid">
           {sortedMonsters.map((m) => (
-            <MonsterCard key={m.id} monster={m} currentPage={currentPage} />
+            <MonsterCard
+  key={m.id}
+  monster={m}
+/>
           ))}
         </div>
       )}
-      {(filters.size || filters.type || filters.region) && sortedMonsters.length > 0 && (
-        <button className="load-more-btn" onClick={handleLoadMore} disabled={loading}>
-          {loading ? t('loading') : 'Carregar mais'}
-        </button>
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
-      {totalPages > 1 && !loading && (
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-      )}
+
       <Footer />
     </>
   );

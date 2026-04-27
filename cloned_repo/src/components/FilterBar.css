@@ -4,6 +4,20 @@
   padding: 0 var(--space-4);
 }
 
+/* Group headers for clearer hierarchy */
+.filter-chip-group + .filter-chip-group::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: var(--border-subtle);
+  margin: var(--space-6) 0;
+}
+
+/* First group doesn't need top separator */
+.filter-chip-group:first-of-type::before {
+  display: none;
+}
+
 .filter-container {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
