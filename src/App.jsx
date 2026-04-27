@@ -1,6 +1,6 @@
 import './styles/App.css';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import LoadingSkeleton from './components/LoadingSkeleton';
 
@@ -8,6 +8,13 @@ const HomePage = lazy(() => import('./pages/HomePage'));
 const MonsterPage = lazy(() => import('./pages/MonsterPage'));
 
 function App() {
+  // Redirect para /#/ se não houver hash
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.location.hash = '/';
+    }
+  }, []);
+
   return (
     <LanguageProvider>
         <Router>
