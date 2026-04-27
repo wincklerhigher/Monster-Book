@@ -8,7 +8,10 @@ const BASE_URL = 'https://api.open5e.com/v1';
 export const fetchMonsters = async ({ page = 1, cr = '', type = '', search = '' } = {}) => {
   const params = new URLSearchParams();
   if (page > 1) params.set('page', page);
-  if (cr) params.set('cr', cr);
+  if (cr) {
+    const crMap = { '1/4': '0.25', '1/2': '0.5' };
+    params.set('cr', crMap[cr] || cr);
+  }
   if (type) params.set('type', type);
   if (search) params.set('search', search);
   
@@ -132,6 +135,20 @@ export const fetchMonsterTypes = async () => {
 };
 
 export const fetchMonsterBySlug = async (slug) => {
+  // Try direct API endpoint first (most reliable)
+  try {
+    const response = await fetch(`${BASE_URL}/monsters/${slug}/`);
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Direct API success for', slug + ':', data.name);
+      return data;
+    }
+    console.log('Direct API failed for', slug, 'status:', response.status);
+  } catch (e) {
+    console.log('Direct API error for', slug + ':', e.message);
+  }
+  
+  // Fallback to search
   const cleanSlug = slug.replace(/-/g, ' ');
   
   const prefixes = ['accursed', 'cursed', 'blessed', 'sacred', 'corrupted', 'armored', 'heavy', 'light'];
@@ -141,35 +158,26 @@ export const fetchMonsterBySlug = async (slug) => {
   }
   
   searchTerm = searchTerm.trim();
-  if (!searchTerm) {
-    throw new Error('Monster not found');
-  }
-  
+
   const trySearch = async (term) => {
     const response = await fetch(`${BASE_URL}/monsters/?search=${encodeURIComponent(term)}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch monster: ${response.status}`);
     }
-    return response.json();
+    const data = await response.json();
+    console.log('API results for', term + ':', data.results?.length, 'monsters');
+    return data;
   };
-  
+
   let data = await trySearch(searchTerm);
-  let monster = data.results?.find(m => m.slug === slug);
   
-  if (!monster && data.results?.length > 0) {
-    monster = data.results[0];
-  }
-  
-  if (!monster) {
+  if (!data.results || data.results.length === 0) {
     const altData = await trySearch(cleanSlug);
-    monster = altData.results?.find(m => m.slug === slug);
-    if (!monster && altData.results?.length > 0) {
-      monster = altData.results[0];
+    if (!altData.results || altData.results.length === 0) {
+      throw new Error('Monster not found');
     }
+    return altData.results[0];
   }
-  
-  if (!monster) {
-    throw new Error('Monster not found');
-  }
-  return monster;
+
+  return data.results[0];
 };

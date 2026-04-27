@@ -21,10 +21,16 @@ const MonsterPage = () => {
     const loadMonster = async () => {
       try {
         setLoading(true);
+        console.log('Fetching monster with id:', id);
         const data = await fetchMonsterBySlug(id);
-        if (!data) throw new Error(t('monsterNotFound'));
+        if (!data) {
+          console.log('No data returned for slug:', id);
+          throw new Error(t('monsterNotFound'));
+        }
+        console.log('Monster loaded:', data.name, 'slug:', data.slug);
         setMonster(normalizeMonster(data));
-      } catch {
+      } catch (e) {
+        console.error('Error loading monster:', e.message, 'id was:', id);
         setError(t('monsterNotFound'));
         addNotFoundMonster(id);
       } finally {
@@ -70,7 +76,7 @@ const MonsterPage = () => {
       <div className="monster-detail">
         {/* Optional media */}
         {monster.image && (
-          <div className="monster-media"><img src={monster.image} alt={monster.name} /></div>
+          <div className="monster-media"><img src={monster.image} alt={monster.name} width="800" height="400" /></div>
         )}
 
         <h1 className="monster-name">{monster.namePt || monster.name}</h1>

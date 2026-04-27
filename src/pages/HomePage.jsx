@@ -103,6 +103,7 @@ const HomePage = () => {
           setCurrentPage(calculatedPages);
         }
       } catch (e) {
+        console.error('Fetch error:', e, 'Filters:', filters);
         if (e.message.includes('404')) {
           const lastPage = Math.max(1, currentPage - 1);
           setCurrentPage(lastPage);

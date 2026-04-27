@@ -120,6 +120,8 @@ const MonsterCard = ({ monster }) => {
                   alt={monster.name}
                   loading="lazy"
                   className="monster-image"
+                  width="400"
+                  height="200"
                   onError={() => setImageError(true)}
                 />
               ) : (

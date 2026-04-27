@@ -10,7 +10,7 @@ const MonsterPage = lazy(() => import('./pages/MonsterPage'));
 function App() {
   return (
     <LanguageProvider>
-        <Router basename="/Monster-Book">
+        <Router basename="/">
         <div className="App">
           <Suspense fallback={<LoadingSkeleton />}>
             <Routes>
