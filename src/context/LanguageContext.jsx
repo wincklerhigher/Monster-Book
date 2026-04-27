@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+
 
 const translations = {
   pt: {
@@ -81,7 +82,11 @@ en: {
   },
 };
 
-const LanguageContext = createContext();
+const LanguageContext = createContext({
+  lang: 'pt',
+  setLang: () => {},
+  t: (key) => key,
+});
 
 export const LanguageProvider = ({ children }) => {
   const [lang, setLang] = useState(() => {
@@ -95,13 +100,17 @@ export const LanguageProvider = ({ children }) => {
     localStorage.setItem('lang', lang);
   }, [lang]);
 
-  const t = (key) => translations[lang][key] || key;
+  const t = useCallback((key) => translations[lang][key] || key, [lang]);
+
+  const contextValue = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );
 };
+
+
 
 export const useLanguage = () => useContext(LanguageContext);

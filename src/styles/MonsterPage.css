@@ -409,3 +409,94 @@
     font-size: var(--text-base);
   }
 }
+
+/* ==================== SCENARIO CONTEXT ==================== */
+
+.scenario-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
+  background: linear-gradient(135deg, rgba(139, 69, 19, 0.1), rgba(139, 69, 19, 0.05));
+  border: 1px solid rgba(139, 69, 19, 0.3);
+  border-radius: var(--radius-lg);
+  justify-content: center;
+}
+
+.context-setting {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: linear-gradient(135deg, var(--gold-worn), var(--gold-antique));
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  color: var(--bg-void);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.context-setting .context-icon {
+  font-size: var(--text-lg);
+}
+
+.context-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-3);
+}
+
+.context-item .context-icon {
+  font-size: var(--text-lg);
+}
+
+.context-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.context-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.context-value {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* Lore Section */
+.monster-lore {
+  margin: var(--space-6) 0;
+  padding: var(--space-6);
+  background: var(--bg-card);
+  border: 1px solid rgba(139, 69, 19, 0.3);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--gold-worn);
+}
+
+.lore-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--gold-worn);
+}
+
+.title-icon {
+  font-size: var(--text-xl);
+}
+
+.lore-text {
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  font-style: italic;
+}

@@ -65,7 +65,7 @@ const typeData = {
   }
 };
 
-const MonsterCard = ({ monster }) => {
+const MonsterCard = ({ monster, currentPage }) => {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const displayName = monster.namePt || monster.name;
@@ -92,7 +92,8 @@ const MonsterCard = ({ monster }) => {
   const [searchParams] = useSearchParams();
   return (
     <Link 
-      to={`/monster/${monster.id}?${searchParams.toString()}`} 
+      to={`/monster/${monster.id}?${searchParams.toString()}`}
+      state={{ page: currentPage }}
       className="monster-card"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -156,6 +157,22 @@ const MonsterCard = ({ monster }) => {
               <h3>{displayName}</h3>
               <div className="name-decoration"></div>
             </div>
+
+            {/* Scenario Badges */}
+            {(monster.regionData || monster.environmentData) && (
+              <div className="scenario-badges">
+                {monster.regionData && (
+                  <span className="scenario-badge region-badge" title={monster.regionData.description}>
+                    {monster.regionData.icon} {monster.regionData.name}
+                  </span>
+                )}
+                {monster.environmentData && (
+                  <span className="scenario-badge environment-badge" title={monster.environmentData.description}>
+                    {monster.environmentData.icon} {monster.environmentData.name}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Hover Effect */}
             {isHovered && (

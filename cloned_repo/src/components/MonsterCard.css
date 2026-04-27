@@ -1,0 +1,330 @@
+.monster-card {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--transition-slow);
+  display: block;
+}
+
+.monster-card:hover {
+  transform: translateY(-4px);
+}
+
+.monster-card-outer {
+  position: relative;
+  width: 100%;
+}
+
+.monster-card-frame {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-slow);
+}
+
+.monster-card:hover .monster-card-frame {
+  border-color: var(--border-soft);
+  box-shadow: var(--shadow-xl);
+}
+
+.monster-card-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Header */
+.monster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.type-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+.type-icon {
+  font-size: 0.9rem;
+}
+
+.type-text {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.cr-badge {
+  background: linear-gradient(135deg, var(--gold-worn), var(--gold-antique));
+  border: 1px solid var(--gold-dim);
+  border-radius: 999px;
+  padding: 6px 12px;
+  box-shadow:
+    0 2px 8px rgba(212, 175, 95, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.cr-value {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--bg-void);
+  letter-spacing: 0.04em;
+}
+
+.cr-text {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--bg-void);
+  opacity: 0.8;
+  letter-spacing: 0.04em;
+}
+
+/* Preview */
+.monster-image-container {
+  position: relative;
+  width: 100%;
+  height: 215px;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  flex: 0 0 auto;
+}
+
+.monster-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-base);
+}
+
+.monster-card:hover .monster-image {
+  transform: scale(1.02);
+}
+
+.monster-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-background {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.placeholder-content {
+  text-align: center;
+  z-index: 2;
+}
+
+.placeholder-icon {
+  font-size: 2rem;
+  opacity: 0.22;
+  margin-bottom: 8px;
+}
+
+.placeholder-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+}
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(14, 12, 20, 0.16) 100%);
+  pointer-events: none;
+}
+
+/* Meta */
+.monster-stats {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+
+.monster-size,
+.monster-alignment {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.size-label,
+.alignment-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.size-value,
+.alignment-value {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+/* Name */
+.monster-name {
+  text-align: center;
+  padding-top: 2px;
+}
+
+.monster-name h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.25;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.name-decoration {
+  width: 26px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border-soft), transparent);
+  margin: 8px auto 0;
+}
+
+/* Effects */
+.card-glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-xl);
+  background: radial-gradient(ellipse at center, rgba(212, 175, 95, 0.08) 0%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-slow);
+}
+
+.monster-card:hover .card-glow {
+  opacity: 1;
+}
+
+.card-border {
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-radius: calc(var(--radius-xl) + 2px);
+  background:
+    linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+    linear-gradient(135deg, var(--gold-worn), var(--gold-antique)) border-box;
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+  z-index: 1;
+}
+
+.monster-card:hover .card-border {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .monster-card-frame {
+    padding: 10px;
+  }
+
+  .monster-image-container {
+    height: 180px;
+  }
+
+  .monster-stats {
+    gap: 12px;
+  }
+
+  .monster-name h3 {
+    font-size: 0.98rem;
+  }
+
+  .placeholder-name {
+    font-size: 2.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .monster-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .monster-card-frame {
+    padding: 10px;
+  }
+
+  .monster-image-container {
+    height: 160px;
+    margin-bottom: 10px;
+  }
+
+  .monster-header {
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+  }
+
+  .type-badge,
+  .cr-badge {
+    padding: 5px 9px;
+  }
+
+  .type-text,
+  .cr-value,
+  .cr-text {
+    font-size: 0.62rem;
+  }
+
+  .monster-stats {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .monster-name h3 {
+    font-size: 0.92rem;
+  }
+
+  .placeholder-icon {
+    font-size: 1.5rem;
+  }
+
+  .placeholder-name {
+    font-size: 2.2rem;
+  }
+}

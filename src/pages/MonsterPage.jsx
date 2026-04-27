@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchMonsterBySlug, normalizeMonster } from '../services/open5eApi';
 import { addNotFoundMonster, removeFromNotFoundList } from '../services/notFoundStore';
@@ -88,6 +88,47 @@ const MonsterPage = () => {
             <span className="alignment">{t('alignment')}: {monster.alignment}</span>
           )}
         </div>
+
+        {/* Scenario Context */}
+        {(monster.settingData || monster.regionData || monster.environmentData) && (
+          <div className="scenario-context">
+            {monster.settingData && (
+              <div className="context-setting">
+                <span className="context-icon">{monster.settingData.icon}</span>
+                <span className="context-label">{monster.settingData.name}</span>
+              </div>
+            )}
+            {monster.regionData && (
+              <div className="context-item">
+                <span className="context-icon">{monster.regionData.icon}</span>
+                <div className="context-info">
+                  <span className="context-label">Região</span>
+                  <span className="context-value">{monster.regionData.name}</span>
+                </div>
+              </div>
+            )}
+            {monster.environmentData && (
+              <div className="context-item">
+                <span className="context-icon">{monster.environmentData.icon}</span>
+                <div className="context-info">
+                  <span className="context-label">Ambiente</span>
+                  <span className="context-value">{monster.environmentData.name}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Lore Section */}
+        {monster.lore && (
+          <section className="monster-lore">
+            <h2 className="section-title lore-title">
+              <span className="title-icon">📜</span>
+              Lore de Faerûn
+            </h2>
+            <p className="lore-text">{monster.lore}</p>
+          </section>
+        )}
 
         <hr className="separator" />
         <StatBlock stats={monster} />

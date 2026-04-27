@@ -223,6 +223,46 @@
   margin: var(--space-2) auto 0;
 }
 
+/* Scenario Badges */
+.scenario-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  justify-content: center;
+  margin-top: var(--space-2);
+}
+
+.scenario-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 2px var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  opacity: 0.7;
+  transition: all var(--transition-fast);
+}
+
+.scenario-badge:hover {
+  opacity: 1;
+}
+
+.region-badge {
+  border-color: rgba(139, 69, 19, 0.4);
+  color: var(--gold-worn);
+  background: rgba(139, 69, 19, 0.1);
+}
+
+.environment-badge {
+  border-color: rgba(34, 139, 34, 0.4);
+  color: var(--text-secondary);
+  background: rgba(34, 139, 34, 0.1);
+}
+
 /* Hover Effects */
 .card-glow {
   position: absolute;

@@ -1,0 +1,31 @@
+{
+  "settings": [
+    {
+      "id": "forgotten-realms",
+      "name": "Forgotten Realms",
+      "nameShort": "Faerûn",
+      "description": "O cenário de D&D mais icônico, ambientado no mundo de Toril. Lar de dragões antigos, reinos elves, masmorras lendárias e a muitoamada cidade de Waterdeep.",
+      "icon": "🏰",
+      "color": "#8b4513",
+      "default": true
+    },
+    {
+      "id": "eberron",
+      "name": "Eberron",
+      "nameShort": "Eberron",
+      "description": "Um cenário steampunk e noir de alta mágica, com trens mágicos, corporations goblins e guerra dos últimos 100 anos.",
+      "icon": "⚙️",
+      "color": "#2e5a88",
+      "default": false
+    },
+    {
+      "id": "ravenloft",
+      "name": "Ravenloft",
+      "nameShort": "Mists",
+      "description": "O domínio do Terror. Domínios sombrios governados por senhores oscuros, onde a neblina transforma viajantes em residentes permanentes.",
+      "icon": "🩸",
+      "color": "#4a0e0e",
+      "default": false
+    }
+  ]
+}

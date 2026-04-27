@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useDebounce } from '../hooks/useDebounce';
 import './SearchBar.css';
 
-const SearchBar = ({ onSearch }) => {
-  const [query, setQuery] = useState('');
+const SearchBar = ({ onSearch, resetKey }) => {
+  const [searchParams] = useSearchParams();
+  const queryParam = searchParams.get('search') || '';
+  // Initialize from URL, but also respond to resetKey changes
+  const [query, setQuery] = useState(queryParam);
   const [isFocused, setIsFocused] = useState(false);
   const debouncedQuery = useDebounce(query, 300);
   const { t } = useLanguage();
+
+  // Sync with URL - clear when no search param or when resetKey changes
+  useEffect(() => {
+    setQuery(queryParam);
+  }, [queryParam, resetKey]);
 
   // Call onSearch when debounced query changes, not on every keystroke
   useEffect(() => {
