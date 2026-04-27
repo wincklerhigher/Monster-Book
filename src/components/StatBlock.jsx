@@ -30,7 +30,7 @@ const StatBlock = ({ stats }) => {
         </div>
         <div className="stat-item">
           <span className="stat-label">{t('speed')}</span>
-          <span className="stat-value">{formatSpeed(stats.speed)}</span>
+          <span className="stat-value textual">{formatSpeed(stats.speed)}</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">{t('strength')}</span>

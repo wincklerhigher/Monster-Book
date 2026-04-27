@@ -5,6 +5,7 @@ import './SearchBar.css';
 
 const SearchBar = ({ onSearch }) => {
   const [query, setQuery] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const debouncedQuery = useDebounce(query, 300);
   const { t } = useLanguage();
 
@@ -21,19 +22,38 @@ const SearchBar = ({ onSearch }) => {
   };
 
   return (
-    <div className="search-bar">
-      <form onSubmit={handleSubmit} className="search-form">
-        <input
-          type="text"
-          placeholder={t('searchPlaceholder')}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="search-input"
-        />
-        <button type="submit" className="search-button">
-          {t('searchButton')}
+    <div className={`search-bar ${isFocused ? 'search-bar--focused' : ''}`}>
+      <div className="search-container">
+        <div className="search-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+        </div>
+        <form onSubmit={handleSubmit} className="search-form">
+          <input
+            type="text"
+            placeholder={t('searchPlaceholder')}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            className="search-input"
+          />
+        </form>
+        <button 
+          type="submit" 
+          className="search-button"
+          onClick={handleSubmit}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <span className="button-text">{t('searchButton')}</span>
         </button>
-      </form>
+      </div>
+      <div className="search-glow"></div>
     </div>
   );
 };

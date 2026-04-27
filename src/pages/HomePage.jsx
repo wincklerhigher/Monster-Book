@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
@@ -23,27 +24,24 @@ const parseCR = (cr) => {
   return parseFloat(cr) || 0;
 };
 
-const normalizeName = (name) => {
-  return name
+const normalizeName = (name) =>
+  name
     .toLowerCase()
     .replace(/\s*(wyrmling|young|elder|progenitor|adult|ancient|veteran|master|lesser|greater|half|half-\w+|pawn|brood|spawn)\s*/gi, ' ')
     .replace(/\s*\(.*?\)\s*/gi, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-};
 
 const deduplicateMonsters = (monsters) => {
   const seen = new Map();
-  return monsters.filter(monster => {
+  return monsters.filter((monster) => {
     const baseName = getBaseName(monster.name);
     if (!seen.has(baseName)) {
       seen.set(baseName, monster);
       return true;
     }
     const existing = seen.get(baseName);
-    const existingCR = parseCR(existing.challenge_rating);
-    const newCR = parseCR(monster.challenge_rating);
-    if (newCR > existingCR) {
+    if (parseCR(monster.challenge_rating) > parseCR(existing.challenge_rating)) {
       seen.set(baseName, monster);
       return true;
     }
@@ -53,95 +51,113 @@ const deduplicateMonsters = (monsters) => {
 
 const getBaseName = (name) => {
   const normalized = normalizeName(name);
-  const parts = normalized.split(' ');
-  return parts[0];
+  return normalized.split(' ')[0];
 };
 
 const HomePage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const pageParam = parseInt(searchParams.get('page') || '1', 10);
+  const queryParam = searchParams.get('search') || '';
+  const crParam = searchParams.get('cr') || '';
+  const typeParam = searchParams.get('type') || '';
+  const sizeParam = searchParams.get('size') || '';
+
   const [monsters, setMonsters] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(pageParam);
   const [sortBy, setSortBy] = useState('name');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({ cr: '', type: '', size: '' });
+  const [searchQuery, setSearchQuery] = useState(queryParam);
+  const [filters, setFilters] = useState({ cr: crParam, type: typeParam, size: sizeParam });
   const notFoundList = useState(() => getNotFoundList())[0];
-  const { t } = useLanguage();
 
-  const loadMonsters = useCallback(async (page) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const { monsters: fetchedMonsters, count } = await fetchMonsters({ 
-        page, 
-        search: searchQuery, 
-        cr: filters.cr 
-      });
-      
-      const normalized = fetchedMonsters.map(normalizeMonster);
-      const deduplicated = deduplicateMonsters(normalized);
-      const withOverrides = mergeAllWithOverrides(deduplicated);
-      setMonsters(withOverrides);
+  // load data whenever page, search or filters change
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const { monsters: fetchedMonsters, count } = await fetchMonsters({
+          page: currentPage,
+          search: searchQuery,
+          cr: filters.cr,
+          type: filters.type,
+          size: filters.size,
+        });
+        const normalized = fetchedMonsters.map(normalizeMonster);
+        const deduped = deduplicateMonsters(normalized);
+        setMonsters(mergeAllWithOverrides(deduped));
         setTotalCount(count);
-        setTotalPages(Math.ceil(count / ITEMS_PER_PAGE));
-      } catch (err) {
-      setError('Falha ao carregar monstros. Tente novamente.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [searchQuery, filters.cr, filters.type]);
+        let calculatedPages = Math.ceil(count / ITEMS_PER_PAGE);
+        // USA APENAS at 65 como máximo, independente do que a API retornar
+        if (calculatedPages > 65) {
+          calculatedPages = 65;
+        }
+        setTotalPages(calculatedPages);
+        if (currentPage > calculatedPages) {
+          setCurrentPage(calculatedPages);
+        }
+      } catch (e) {
+        if (e.message.includes('404')) {
+          const lastPage = Math.max(1, currentPage - 1);
+          setCurrentPage(lastPage);
+          setTotalPages(lastPage);
+        } else {
+          setError('Falha ao carregar monstros. Tente novamente.');
+        }
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [currentPage, searchQuery, filters]);
 
+  // keep URL in sync when state changes (search, filters, page)
   useEffect(() => {
-    setCurrentPage(1);
-    loadMonsters(1);
-  }, [searchQuery, filters.cr, filters.type]);
-
-  useEffect(() => {
-    if (currentPage > 1) {
-      loadMonsters(currentPage);
-    }
-  }, [currentPage]);
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('search', searchQuery);
+    if (filters.cr) params.set('cr', filters.cr);
+    if (filters.type) params.set('type', filters.type);
+    if (filters.size) params.set('size', filters.size);
+    if (currentPage !== 1) params.set('page', String(currentPage));
+    setSearchParams(params);
+  }, [searchQuery, filters, currentPage]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
+    setCurrentPage(1);
   };
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
   const sortedMonsters = useMemo(() => {
-    return [...monsters].sort((a, b) => {
-      if (filters.size) {
-        const sizeMatch = a.size.toLowerCase().includes(filters.size.toLowerCase());
-        if (!sizeMatch) return 1;
-      }
-      if (sortBy === 'cr') {
-        return parseCR(a.challenge_rating) - parseCR(b.challenge_rating);
-      }
-      return a.name.localeCompare(b.name);
-    }).filter(m => {
-      if (notFoundList.includes(m.id)) {
-        return false;
-      }
-      if (filters.size && !m.size.toLowerCase().includes(filters.size.toLowerCase())) {
-        return false;
-      }
-      if (filters.type && !m.type.toLowerCase().includes(filters.type.toLowerCase())) {
-        return false;
-      }
-      return true;
-    });
+    return [...monsters]
+      .sort((a, b) => {
+        if (filters.size) {
+          if (!a.size.toLowerCase().includes(filters.size.toLowerCase())) return 1;
+        }
+        if (sortBy === 'cr') return parseCR(a.challenge_rating) - parseCR(b.challenge_rating);
+        return a.name.localeCompare(b.name);
+      })
+      .filter((m) => {
+        if (notFoundList.includes(m.id)) return false;
+        if (filters.size && !m.size.toLowerCase().includes(filters.size.toLowerCase())) return false;
+        if (filters.type && !m.type.toLowerCase().includes(filters.type.toLowerCase())) return false;
+        return true;
+      });
   }, [monsters, sortBy, filters, notFoundList]);
 
   if (loading && monsters.length === 0) return <LoadingSkeleton />;
@@ -151,44 +167,25 @@ const HomePage = () => {
       <Hero />
       <SearchBar onSearch={handleSearch} />
       <FilterBar onFilterChange={handleFilterChange} />
-      
       <div className="results-header">
-        <p className="results-count">
-          {totalCount > 0 ? `${totalCount.toLocaleString()} ${t('monsters')}` : t('loading')}
-        </p>
-        <select 
-          className="sort-select"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-        >
+        <select className="sort-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
           <option value="name">{t('sortByName')}</option>
           <option value="cr">{t('sortByCr')}</option>
         </select>
       </div>
-
       {error && <div className="error-container"><p className="error">{error}</p></div>}
-
       <div className="monster-grid">
-        {loading ? (
-          <LoadingSkeleton />
-        ) : sortedMonsters.length === 0 ? (
+        {sortedMonsters.length === 0 ? (
           <div className="empty-state">
             <p>{t('noMonsters')}</p>
             <p className="empty-hint">{t('tryAdjust')}</p>
           </div>
         ) : (
-          sortedMonsters.map(monster => (
-            <MonsterCard key={monster.id} monster={monster} />
-          ))
+          sortedMonsters.map((m) => <MonsterCard key={m.id} monster={m} />)
         )}
       </div>
-
-      {!loading && totalPages > 1 && (
-        <Pagination 
-          currentPage={currentPage} 
-          totalPages={totalPages} 
-          onPageChange={handlePageChange} 
-        />
+      {totalPages > 1 && (
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
       )}
       <Footer />
     </>

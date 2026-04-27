@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchMonsterBySlug, normalizeMonster } from '../services/open5eApi';
 import { addNotFoundMonster, removeFromNotFoundList } from '../services/notFoundStore';
@@ -9,6 +9,7 @@ import Footer from '../components/Footer';
 import '../styles/MonsterPage.css';
 
 const MonsterPage = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [monster, setMonster] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,97 +22,117 @@ const MonsterPage = () => {
       try {
         setLoading(true);
         const data = await fetchMonsterBySlug(id);
-        if (!data) {
-          setError(t('monsterNotFound'));
-          addNotFoundMonster(id);
-          return;
-        }
-        const normalized = normalizeMonster(data);
-        setMonster(normalized);
-      } catch (err) {
+        if (!data) throw new Error(t('monsterNotFound'));
+        setMonster(normalizeMonster(data));
+      } catch {
         setError(t('monsterNotFound'));
         addNotFoundMonster(id);
-        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
     loadMonster();
   }, [id, t]);
 
-  if (loading) return <div className="loading">{t('loading')}</div>;
-  if (error) return <div className="error">{error}</div>;
-  if (!monster) return <div className="not-found">{t('monsterNotFound')}</div>;
+  if (loading) return (
+    <div className="monster-page">
+      <div className="monster-loading">
+        <div className="loading-spinner" />
+        <p>{t('loading')}</p>
+      </div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="monster-page">
+      <div className="monster-error">
+        <div className="error-icon">⚠️</div>
+        <p>{error}</p>
+        <button onClick={() => navigate(-1)}>{t('back')}</button>
+      </div>
+    </div>
+  );
+
+  if (!monster) return null;
 
   return (
     <div className="monster-page">
+      <div className="page-background"><div className="page-vignette" /></div>
       <div className="page-header">
-        <button className="back-button" onClick={() => window.history.back()}>
-          ← {t('back')}
+        <button className="back-button" onClick={() => navigate(-1)}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>{t('back')}
         </button>
         <LanguageSwitch />
       </div>
+
       <div className="monster-detail">
+        {/* Optional media */}
+        {monster.image && (
+          <div className="monster-media"><img src={monster.image} alt={monster.name} /></div>
+        )}
+
         <h1 className="monster-name">{monster.namePt || monster.name}</h1>
-        <div className="monster-stats">
-          <span className="badge cr">CR {monster.challenge_rating}</span>
-          <span className="badge type">{monster.type}</span>
-          <span className="badge size">{monster.size}</span>
+        <div className="monster-basic">
+          <span className="crt">{t('cr')}: {monster.challenge_rating}</span>
+          <span className="type">{t('type')}: {monster.type}</span>
+          <span className="size">{t('size')}: {monster.size}</span>
           {monster.alignment && (
-            <span className="badge alignment">{monster.alignment}</span>
+            <span className="alignment">{t('alignment')}: {monster.alignment}</span>
           )}
         </div>
-        {monster.image ? (
-          <img src={monster.image} alt={monster.name} className="monster-image" loading="lazy" />
-        ) : (
-          <div className="placeholder-image">{t('noImage')}</div>
-        )}
+
+        <hr className="separator" />
         <StatBlock stats={monster} />
+
         {monster.actions && monster.actions.length > 0 && (
-          <div className="section">
-            <h2>{t('actions')}</h2>
+          <section className="monster-actions">
+            <h2 className="section-title">{t('actions')}</h2>
             <ul className="actions-list">
-              {monster.actions.map((action, index) => (
-                <li key={index} className="action-item">
-                  <strong>{action.name}:</strong> {action.description}
+              {monster.actions.map((action, i) => (
+                <li key={i} className="action-item">
+                  <span className="action-name">{action.name}:</span>
+                  <span className="action-desc">{action.description}</span>
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
         {monster.special_abilities && monster.special_abilities.length > 0 && (
-          <div className="section">
-            <h2>{t('specialAbilities')}</h2>
+          <section className="monster-abilities">
+            <h2 className="section-title">{t('specialAbilities')}</h2>
             <ul className="abilities-list">
-              {monster.special_abilities.map((ability, index) => (
-                <li key={index} className="ability-item">
-                  <strong>{ability.name}:</strong> {ability.description}
+              {monster.special_abilities.map((ab, i) => (
+                <li key={i} className="ability-item">
+                  <span className="ability-name">{ab.name}:</span>
+                  <span className="ability-desc">{ab.description}</span>
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
         {monster.tags && monster.tags.length > 0 && (
-          <div className="section tags-section">
-            <h2>{t('tags')}</h2>
-            <div className="tags">
-              {monster.tags.map((tag, index) => (
-                <span key={index} className="tag">{tag}</span>
+          <section className="monster-tags">
+            <h2 className="section-title">{t('tags')}</h2>
+            <div className="tags-container">
+              {monster.tags.map((tag, i) => (
+                <span key={i} className="tag">{tag}</span>
               ))}
             </div>
-          </div>
+          </section>
         )}
         {monster.notes && (
-          <div className="section notes-section">
-            <h2>{t('notes')}</h2>
-            <p className="note-text">{monster.notes}</p>
-           </div>
-         )}
-       </div>
-       <Footer />
-     </div>
-   );
+          <section className="monster-notes">
+            <h2 className="section-title">{t('notes')}</h2>
+            <p>{monster.notes}</p>
+          </section>
+        )}
+      </div>
+
+      <Footer />
+    </div>
+  );
 };
 
 export default MonsterPage;

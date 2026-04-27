@@ -1,81 +1,73 @@
 import { useLanguage } from '../context/LanguageContext';
 import './Pagination.css';
+import { useState, useEffect } from 'react';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const { t } = useLanguage();
-  
+  const [goTo, setGoTo] = useState(String(currentPage));
+
+  useEffect(() => setGoTo(String(currentPage)), [currentPage]);
+
   if (totalPages <= 1) return null;
 
-  const getVisiblePages = () => {
-    const pages = [];
-    const maxVisible = 7;
-    
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-      return pages;
-    }
-    
-    const left = Math.max(2, currentPage - 1);
-    const right = Math.min(totalPages - 1, currentPage + 1);
-    
-    pages.push(1);
-    
-    if (currentPage > 3) pages.push('ellipsis-start');
-    
-    for (let i = left; i <= right; i++) {
-      if (!pages.includes(i)) pages.push(i);
-    }
-    
-    if (currentPage < totalPages - 2) pages.push('ellipsis-end');
-    
-    if (!pages.includes(totalPages)) pages.push(totalPages);
-    
-    return pages.sort((a, b) => (typeof a === 'number' ? a : 0) - (typeof b === 'number' ? b : 0));
+  const handleInput = e => {
+    if (/^\d*$/.test(e.target.value)) setGoTo(e.target.value);
   };
 
-  const pages = getVisiblePages();
+  const applyGo = () => {
+    const page = parseInt(goTo, 10);
+    if (isNaN(page)) return;
+    const pageClamped = Math.max(1, Math.min(page, totalPages));
+    if (pageClamped !== currentPage) onPageChange(pageClamped);
+  };
+
+  const handleKeyDown = e => {
+    if (e.key === 'Enter') applyGo();
+  };
 
   return (
-    <div className="pagination">
+    <nav className="pagination">
       <button
-        className="page-btn nav-btn"
+        className="pagination-btn prev-btn"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
         title={t('previous')}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+        {t('previous')}
       </button>
 
-      <div className="pages-container">
-        {pages.map((page) => {
-          if (page === 'ellipsis-start' || page === 'ellipsis-end') {
-            return <span key={page} className="ellipsis">•••</span>;
-          }
-          return (
-            <button
-              key={page}
-              className={`page-btn ${page === currentPage ? 'active' : ''}`}
-              onClick={() => onPageChange(page)}
-            >
-              {page}
-            </button>
-          );
-        })}
+      <div className="pagination-center">
+        <span className="page-label">
+          Página {currentPage} de {totalPages}
+        </span>
+        <div className="jump-group">
+          <input
+            type="number"
+            min="1"
+            max={totalPages}
+            value={goTo}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+          />
+          <button
+            className="go-btn"
+            onClick={applyGo}
+            disabled={parseInt(goTo, 10) === currentPage}
+          >
+            Ir
+          </button>
+        </div>
       </div>
 
       <button
-        className="page-btn nav-btn"
+        className="pagination-btn next-btn"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
         title={t('next')}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
+        {t('next')}
       </button>
-    </div>
+    </nav>
   );
 };
 
