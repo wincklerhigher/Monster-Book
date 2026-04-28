@@ -58,6 +58,7 @@ const getBaseName = (name) => {
 
 const HomePage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { t } = useLanguage();
 
   const pageParam = parseInt(searchParams.get('page') || '1', 10);
