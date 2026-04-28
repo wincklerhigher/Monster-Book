@@ -112,7 +112,7 @@ const HomePage = () => {
     if (filters.region && searchQuery) {
       setSearchQuery('');
     }
-  }, [filters.region]);
+  }, [filters.region, searchQuery]);
   
   // load data whenever page, search or filters change
   useEffect(() => {
