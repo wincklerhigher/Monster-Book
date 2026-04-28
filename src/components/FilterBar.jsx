@@ -1,13 +1,11 @@
 import { useState, useCallback } from 'react';
-import { useLanguage } from '../context/LanguageContext';
 import './FilterBar.css';
 
 const FilterBar = ({ onFilterChange }) => {
   const [cr, setCr] = useState('');
   const [type, setType] = useState('');
   const [size, setSize] = useState('');
-  const { t } = useLanguage();
-
+  
   const handleReset = useCallback(() => {
     setCr('');
     setType('');
