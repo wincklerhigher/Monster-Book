@@ -138,14 +138,6 @@ const HomePage = () => {
             'sword-coast': 'dwarf humanoid',
             'underdark': 'drow aboleth'
           };
-          const envSearch = {
-            'underdark': 'drow',
-            'forest': 'wolf',
-            'swamp': 'crocodile',
-            'mountain': 'giant',
-            'desert': 'scorpion',
-            'cave': 'troll'
-};
           
           // When filter is active, use filter's search term
           let searchTerm = searchQuery;
