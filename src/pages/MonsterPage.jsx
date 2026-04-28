@@ -11,12 +11,15 @@ import '../styles/MonsterPage.css';
 const MonsterPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { t } = useLanguage();
+
   const [monster, setMonster] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { t } = useLanguage();
 
   useEffect(() => {
+    if (!id) return;
+    
     removeFromNotFoundList(id);
     const loadMonster = async () => {
       try {
@@ -39,6 +42,17 @@ const MonsterPage = () => {
     };
     loadMonster();
   }, [id, t]);
+
+  if (!id) {
+    return (
+      <div className="monster-page">
+        <div className="monster-error">
+          <p>{t('monsterNotFound')}</p>
+          <button onClick={() => navigate(-1)}>{t('back')}</button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) return (
     <div className="monster-page">

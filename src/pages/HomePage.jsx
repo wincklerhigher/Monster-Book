@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import Hero from '../components/Hero';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
@@ -58,7 +58,6 @@ const getBaseName = (name) => {
 
 const HomePage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { t } = useLanguage();
 
   const pageParam = parseInt(searchParams.get('page') || '1', 10);
