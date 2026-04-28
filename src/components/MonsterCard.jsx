@@ -113,9 +113,9 @@ const MonsterCard = ({ monster, currentPage }) => {
               </div>
             </div>
 
-            {/* Image Section */}
-            <div className="monster-image-container">
-              {monster.image && !imageError ? (
+            {/* Image Section - Only renders if real image exists */}
+            {monster.image && !imageError && (
+              <div className="monster-image-container">
                 <img
                   src={monster.image}
                   alt={monster.name}
@@ -125,18 +125,9 @@ const MonsterCard = ({ monster, currentPage }) => {
                   height="200"
                   onError={() => setImageError(true)}
                 />
-              ) : (
-                <div className="monster-placeholder">
-                  <div className="placeholder-background" style={{ background: typeInfo.gradient }}>
-                    <div className="placeholder-content">
-                      <span className="placeholder-icon">{typeInfo.icon}</span>
-                      <span className="placeholder-name">{displayName.charAt(0).toUpperCase()}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div className="image-overlay"></div>
-            </div>
+                <div className="image-overlay"></div>
+              </div>
+            )}
 
             {/* Monster Stats */}
             <div className="monster-stats">
@@ -151,6 +142,9 @@ const MonsterCard = ({ monster, currentPage }) => {
                 </div>
               )}
             </div>
+
+            {/* Elegant Divider */}
+            <div className="monster-divider"></div>
 
             {/* Monster Name */}
             <div className="monster-name">

@@ -90,8 +90,9 @@ const HomePage = () => {
   // Sync state with URL params - clear if not in URL
   const [resetKey, setResetKey] = useState(0);
   
-  // Sync state with URL params - clear if not in URL
+  // Sync state with URL params - SOMENTE ATUALIZA SE VALORES REALMENTE MUDARAM
   useEffect(() => {
+    // Apenas sincroniza estado, NÃO reseta página nem limpa monstros
     setSearchQuery(queryParam);
     setFilters({
       cr: crParam,
@@ -100,10 +101,12 @@ const HomePage = () => {
       region: regionParam,
       environment: environmentParam
     });
-    setCurrentPage(1);
-    setExtraPages(0);
-    setMonsters([]); // Clear old monsters
-  }, [queryParam, crParam, typeParam, sizeParam, regionParam, environmentParam]);
+    
+    // Sincroniza página da URL sem resetar para 1
+    if (pageParam && pageParam !== currentPage) {
+      setCurrentPage(pageParam);
+    }
+  }, [queryParam, crParam, typeParam, sizeParam, regionParam, environmentParam, pageParam]);
   
   // clear search when region filter is used
   useEffect(() => {
@@ -377,7 +380,9 @@ allMonsters = [...allMonsters, ...deduped];
       </div>
       {error && <div className="error-container"><p className="error">{error}</p></div>}
       <div className="monster-grid">
-        {sortedMonsters.length === 0 ? (
+        {loading ? (
+          <LoadingSkeleton />
+        ) : sortedMonsters.length === 0 ? (
           <div className="empty-state">
             <p>{t('noMonsters')}</p>
             <p className="empty-hint">{t('tryAdjust')}</p>
