@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchMonsterBySlug, normalizeMonster } from '../services/open5eApi';
 import { addNotFoundMonster, removeFromNotFoundList } from '../services/notFoundStore';
