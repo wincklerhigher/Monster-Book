@@ -7,11 +7,11 @@ import MonsterCard from '../components/MonsterCard';
 import Pagination from '../components/Pagination';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import Footer from '../components/Footer';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/Language-Context';
 import { fetchMonsters, normalizeMonster } from '../services/open5eApi';
 import { mergeAllWithOverrides } from '../services/overrides';
 import { enrichMonsterWithScenario } from '../services/scenarioService';
-import { normalizeFilterValue, normalizeFilterForComparison } from '../services/filterMapper';
+import { normalizeFilterValue } from '../services/filterMapper';
 import { getNotFoundList } from '../services/notFoundStore';
 import '../styles/HomePage.css';
 
@@ -68,9 +68,7 @@ const HomePage = () => {
   const sizeParam = searchParams.get('size') || '';
   const regionParam = searchParams.get('region') || '';
   const environmentParam = searchParams.get('environment') || '';
-
-  const [monsters, setMonsters] = useState([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [monsters, setMonsters] = useState([]);  
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -106,7 +104,7 @@ const HomePage = () => {
     if (pageParam && pageParam !== currentPage) {
       setCurrentPage(pageParam);
     }
-  }, [queryParam, crParam, typeParam, sizeParam, regionParam, environmentParam, pageParam]);
+  }, [queryParam, crParam, typeParam, sizeParam, regionParam, environmentParam, pageParam, currentPage]);
   
   // clear search when region filter is used
   useEffect(() => {
@@ -164,8 +162,7 @@ const HomePage = () => {
           
           console.log('Filters:', filters, 'SearchTerm:', searchTerm || '(none)');
           
-          let allMonsters = [];
-          let totalCount = 0;
+          let allMonsters = [];          
           
           // Load more pages when filter is active
           const pagesToFetch = filters.region ? 3 : 1;
@@ -173,7 +170,7 @@ const HomePage = () => {
           for (let page = 1; page <= pagesToFetch; page++) {
             try {
               console.log('Fetching page', page, 'search:', searchTerm);
-              const { monsters: fetchedMonsters, count } = await fetchMonsters({
+              const { monsters: fetchedMonsters } = await fetchMonsters({
                 page,
                 search: searchTerm,
                 cr: filters.cr
@@ -187,8 +184,7 @@ const HomePage = () => {
               }
               const normalized = fetchedMonsters.map(normalizeMonster);
               const deduped = deduplicateMonsters(normalized);
-allMonsters = [...allMonsters, ...deduped];
-              totalCount = count;
+allMonsters = [...allMonsters, ...deduped];              
             } catch (err) {
               console.log('Page error:', page, err.message);
               break;
@@ -201,8 +197,7 @@ allMonsters = [...allMonsters, ...deduped];
           const withScenario = withOverrides.map(enrichMonsterWithScenario);
           console.log('Loaded:', withScenario.length);
           
-          setMonsters(withScenario);
-          setTotalCount(totalCount);
+          setMonsters(withScenario);          
           setExtraPages(0);
         } else {
           // Sem filtros locais - comportamento normal paginado
@@ -216,8 +211,7 @@ allMonsters = [...allMonsters, ...deduped];
           const deduped = deduplicateMonsters(normalized);
           const withOverrides = mergeAllWithOverrides(deduped);
           const withScenario = withOverrides.map(enrichMonsterWithScenario);
-          setMonsters(withScenario);
-          setTotalCount(count);
+          setMonsters(withScenario);          
           
           let calculatedPages = Math.ceil(count / ITEMS_PER_PAGE);
           if (calculatedPages > 65) {

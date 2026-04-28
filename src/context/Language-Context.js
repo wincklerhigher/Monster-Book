@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext } from 'react';
 
-const translations = {
+export const translations = {
   pt: {
     searchPlaceholder: 'Buscar monstros...',
     filterCr: 'Nível de Desafio (CR)',
@@ -40,7 +40,7 @@ const translations = {
     heroTitle: 'Livro dos Monstros',
     heroSubtitle: 'Descubra as melhores criaturas para suas aventuras',
   },
-en: {
+  en: {
     searchPlaceholder: 'Search monsters...',
     filterCr: 'Challenge Rating (CR)',
     filterType: 'Type',
@@ -81,27 +81,10 @@ en: {
   },
 };
 
-const LanguageContext = createContext();
-
-export const LanguageProvider = ({ children }) => {
-  const [lang, setLang] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('lang') || 'pt';
-    }
-    return 'pt';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('lang', lang);
-  }, [lang]);
-
-  const t = (key) => translations[lang][key] || key;
-
-  return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
+export const LanguageContext = createContext({
+  lang: 'pt',
+  setLang: () => {},
+  t: (key) => key,
+});
 
 export const useLanguage = () => useContext(LanguageContext);

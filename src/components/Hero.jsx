@@ -1,4 +1,4 @@
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/Language-Context';
 import LanguageSwitch from './LanguageSwitch';
 import './Hero.css';
 

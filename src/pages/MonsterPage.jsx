@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/Language-Context';
 import { fetchMonsterBySlug, normalizeMonster } from '../services/open5eApi';
 import { addNotFoundMonster, removeFromNotFoundList } from '../services/notFoundStore';
 import LanguageSwitch from '../components/LanguageSwitch';

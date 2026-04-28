@@ -1,4 +1,4 @@
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/Language-Context';
 import './StatBlock.css';
 
 const StatBlock = ({ stats }) => {

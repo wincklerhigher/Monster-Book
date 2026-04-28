@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/Language-Context';
 import { useDebounce } from '../hooks/useDebounce';
 import './SearchBar.css';
 
