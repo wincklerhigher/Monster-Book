@@ -330,7 +330,15 @@ allMonsters = [...allMonsters, ...deduped];
   };
 
   const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      // Atualiza URL com o número da página
+      setSearchParams(prev => {
+        const params = new URLSearchParams(prev);
+        params.set('page', page.toString());
+        return params;
+      });
+    }
   };
 
   const handleLoadMore = async () => {
